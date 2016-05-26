@@ -46,27 +46,17 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
                         # dataf$c..nt <- ifelse(is.na(dataf[, ordervar]), 0, 1)
                         #
                         # ordervar <- "c..nt"
+                        # ne rien faire ??
                 } else {
                         dataf$c..nt <-
                                 ifelse(is.na(dataf[, ordervar]), 0 , ifelse(dataf[, ordervar] == orderval, 1, 0))
                         ordervar <- "c..nt"
                 }
-                # facteur réordonné
-                # resfact <- reorder(dataf[,nomfact], direction * dataf[ , ordervar], orderfun, na.rm = TRUE)
-
-
-                # resfact <- reorderlevels(dataf,nomfact, nomvar=ordervar, decreasing=orderdesc , fun=orderfun)
-                # resfact <- reorderlevels(dataf[,nomfact], dataf[ , ordervar], decreasing=orderdesc , fun=orderfun)
+                # réordonner le facteur
                 xx <- dataf[,nomfact]
                 xxx <- direction * dataf[ , ordervar]
-                # print(ordervar); print(xx) ; print(xxx)
-                # xx <- as.vector(xx)
-                # xxx <- as.vector(xxx)
-                # print(ordervar); print(xx) ; print(xxx); print(names(xx));print(names(xxx))
                 resfact <- reorder(xx, xxx, orderfun, na.rm = TRUE)
 
-#                 factor(dataf[,nomfact], levels = dataf[order(xxx), nomfact])
-                # resfact <- with(dataf, reorder(eval(as.name(nomfact)), as.name("perc"), sum, na.rm = TRUE))
 
         } else {
                 resfact <- factor(dataf[,nomfact], levels = nlevels)
