@@ -60,8 +60,8 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
                 xx <- dataf[,nomfact]
                 xxx <- direction * dataf[ , ordervar]
                 # print(ordervar); print(xx) ; print(xxx)
-                xx <- as.vector(xx)
-                xxx <- as.vector(xxx)
+                # xx <- as.vector(xx)
+                # xxx <- as.vector(xxx)
                 # print(ordervar); print(xx) ; print(xxx); print(names(xx));print(names(xxx))
                 resfact <- reorder(xx, xxx, orderfun, na.rm = TRUE)
 

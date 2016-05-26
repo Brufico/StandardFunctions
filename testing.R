@@ -68,8 +68,9 @@ dtf <- make_testdata()
 # TEST condfreqtable()
 
 # aa <- condfreqtable(dtf, "nam1", "nam2")
-# condfreqtable(dtf, "nam1", "dval1")
-# reshape in a crosstab
+# condfreqtable(dtf, "nam1", "nam2")
+# condfreqtable(dtf, "nam1", "dval1", useNA = "yes")
+# Another way: reshape in a crosstab
 # dcast(aa, formula = nam1 ~ nam2 , value.var = "perc", drop=FALSE, fill = 0)
 
 
@@ -104,43 +105,45 @@ reorderlevels <- function(df, nomfact, nomvar,fun = mean, decreasing = FALSE) {
 
 
 # Tests ==============================================================================================
-# # TEST reorder
-# mymean <- function(x) mean(x, na.rm = TRUE)
-# mysum <- function(x) sum(x, na.rm = TRUE)
-#
-# # dtf <- make_testdata()
-# table(dtf$nam1)
-# table(dtf$nam1,dtf$nam2)
-# mcv2 <- dtf %>% group_by(nam1) %>% summarise(val=mymean(cval2)) ; mcv2
-#
-# aba <- condfreqtable(dtf, "nam1", "nam2")
-# aba <- as.data.frame(aba)
-# abay <- aba[aba[, "nam2"] == "j", ]
-# abaz <- rbind(abay,abay,abay,abay,abay,abay)
-# colnames(abay)
-#
-#
-# levels(dtf$nam1)
-# dtf$nam1 <- orderfact(dtf,"nam1") ; levels(dtf$nam1) #ok
-# dtf$nam1 <- orderfact(dtf,"nam1", orderdesc = FALSE) ; levels(dtf$nam1) #ok
-# dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "dval2", orderfun = sum, orderdesc = TRUE) ; levels(dtf$nam1)#ok
-# dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "dval2", orderfun = sum, orderdesc = FALSE) ; levels(dtf$nam1)#ok
-# dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "cval2", orderfun = mean, orderdesc = TRUE) ; levels(dtf$nam1)#ok
-# dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "cval2", orderfun = sum, orderdesc = TRUE) ; levels(dtf$nam1)#ok
-# dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "nam2", orderval = "j") ; levels(dtf$nam1)
-#
-# xy$nam1
-# xy[,"nam1"]
-# xy[,"perc"]
-#
-# dtf$nam1 <- orderfact(dtf,"nam1"); levels(dtf$nam1)
-# aba$nam1 <- orderfact(aba,"nam1"); levels(aba$nam1)
-# abaz$nam1 <- orderfact(abaz,"nam1"); levels(abaz$nam1)
-#
-# xy$nam1 <- orderfact(xy, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(xy$nam1)
-# dtf$nam1 <- orderfact(dtf, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(dtf$nam1)
-# aa$nam1 <- orderfact(aa, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(aa$nam1)
+# TEST reorder
+mymean <- function(x) mean(x, na.rm = TRUE)
+mysum <- function(x) sum(x, na.rm = TRUE)
 
+# dtf <- make_testdata()
+table(dtf$nam1)
+table(dtf$nam1,dtf$nam2)
+mcv2 <- dtf %>% group_by(nam1) %>% summarise(val=mymean(cval2)) ; mcv2
+
+aba <- condfreqtable(dtf, "nam1", "nam2")
+aba <- as.data.frame(aba)
+abay <- aba[aba[, "nam2"] == "j", ]
+abaz <- rbind(abay,abay,abay,abay,abay,abay)
+colnames(abay)
+
+
+levels(dtf$nam1)
+dtf$nam1 <- orderfact(dtf,"nam1") ; levels(dtf$nam1) #ok
+dtf$nam1 <- orderfact(dtf,"nam1", orderdesc = FALSE) ; levels(dtf$nam1) #ok
+dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "dval2", orderfun = sum, orderdesc = TRUE) ; levels(dtf$nam1)#ok
+dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "dval2", orderfun = sum, orderdesc = FALSE) ; levels(dtf$nam1)#ok
+dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "cval2", orderfun = mean, orderdesc = TRUE) ; levels(dtf$nam1)#ok
+dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "cval2", orderfun = sum, orderdesc = TRUE) ; levels(dtf$nam1)#ok
+dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "nam2", orderval = "j") ; levels(dtf$nam1)
+
+xy$nam1
+xy[,"nam1"]
+xy[,"perc"]
+
+dtf$nam1 <- orderfact(dtf,"nam1"); levels(dtf$nam1)
+aba$nam1 <- orderfact(aba,"nam1"); levels(aba$nam1)
+abaz$nam1 <- orderfact(abaz,"nam1"); levels(abaz$nam1)
+
+xy$nam1 <- orderfact(xy, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(xy$nam1)
+dtf$nam1 <- orderfact(dtf, "nam1", ordervar = "dval2", orderfun = mean, orderdesc = TRUE) ; levels(dtf$nam1)
+
+# reordering in one dframe and transferring order to another
+aa$nam1 <- orderfact(aa, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(aa$nam1)
+dtf$nam1 <- orderfact(dtf, "nam1", nlevels = levels(aa$nam1)); levels(dtf$nam1)
 
 
 # ************************ ================================================================
