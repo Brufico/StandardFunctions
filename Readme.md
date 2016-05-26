@@ -1,16 +1,18 @@
-# Standard Functions for basic Statistical analysis
+# Standard Functions for basic statistical analysis
 
 Here is an attempt to build a set of basic tools for statistical analysis.
 For each situation , one function will provide the most frequent analysis results.
 
+each function should return a list of the following elements:  
+*  
 
 ## List of intended functions
 
 ### One variable
 
-*  cat1         :  1 categorical variable (factor)  
+*  cat1         : 1 categorical variable (factor)  
 *  num1c        : 1 (continuous) numeric variable  
-*  num1d :      1 (discrete) numeric variable  
+*  num1d :      : 1 (discrete) numeric variable  
 
 
 ### Two variables
