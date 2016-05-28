@@ -35,7 +35,7 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
                       ordervar = "c..nt", orderval = NA, orderfun = sum,
                       nlevels = NULL) {
         if (is.null(nlevels)) {
-                direction <- ifelse(orderdesc,-1, 1) ; # print(direction) #dbg
+                direction <- ifelse(orderdesc,-1, 1)
 
                 if (orderfreq & ordervar == "c..nt") {
                         dataf$c..nt <- c(1)
@@ -63,6 +63,13 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
         }
         # retour
         resfact
+}
+
+# ======================================================================================
+# Statistical Testing functions
+# GOF chi-square test for a uniform distribution
+uniform.chisq.test <- function(ofreq) {
+        chisq.test(ofreq, p = rep(1, length(ofreq)), rescale.p = TRUE)
 }
 
 
@@ -102,12 +109,15 @@ cat1 <- function(dataf, nomfact, useNA = "no",
         tbl <- table(dataf[, nomfact], useNA = useNA)
         tbl <- data.frame(num = tbl, rfreq = tbl / sum(tbl))
         tbl <- tbl[, c(1,2,4)]
-        names(tbl) <- c(nomfact, "num","rfreq")
+        names(tbl) <- c(nomfact, "num", "rfreq")
         tbl$numlabs <- paste0("n=" ,tbl$num)
         tbl$perclabs <- paste0(100 * round(tbl$rfreq, digits),"%")
         tbl$index <- ave(1:nrow(tbl),  FUN = function(x) 1:length(x)) # rank
         num <- sum(tbl$num)
-        #
+
+        # Goodness-of-Fit chi-square test for a uniform distribution
+        uchisq <- uniform.chisq.test(tbl[,"num"])
+
         # bar chart with ggplot2
         # the data
         dataf1 <- if (useNA == "no") {
@@ -128,62 +138,19 @@ cat1 <- function(dataf, nomfact, useNA = "no",
         # ylabel
         if (rfreq) {pt <- pt + ylab(label = "percent")}
 
-
+        # return a list of values
         list(   name = nomfact,
                 levels = levels(dataf[, nomfact]),
-                table = tbl, num = num, plot = pt
+                table = tbl, num = num,
+                uchisq = uchisq,
+                plot = pt
         )
 }
-
-
-# # usage, essais et tests
-# # ##a
-# tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc = TRUE, cfill = "red")
-# tp$plot
-# tp$table
-# # ##b
-tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc = FALSE,
-            ordervar = "cval2", orderfun = mean, cfill = "steelblue")
-tp$plot
-tp$table
-
-# plot annotation
-tp$plot + geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=numlabs))
-tp$plot + geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=perclabs))
-tp$plot +
-        geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=ifelse(index <=2,perclabs, "")))+
-        theme(axis.text.x = element_text(angle=45, hjust=1)) +
-                 labs(title = "Statut",
-                      x = "",
-                      y = "pourcentage")
-
-# tp$levels are for transferring level order if needed:
 
 
 
 
 # num1d ==================================================================
-
-# exploration
-# dtf
-# tb <- table(dtf$dval1)
-# tbf <-tb/sum(tb)
-# tbflabs <- paste0(100* round(tbf,2), "%")
-# data.frame(tb, tbf, tbflabs)
-# ggplot(dtf, aes(x = dval1)) +
-#         geom_bar(width = .5, fill = "steelblue" )
-#
-#
-# s <- summary(dtf$dval1, digits = 2)
-# str(s)
-# s["Min."]
-# s["St.dev"] <- sd(dtf$dval1, na.rm = TRUE)
-# s <-s[c("Mean", "St.dev",  "Min.", "1st Qu.", "Median", "3rd Qu.",  "Max.", "NA's") ]
-# sd(dtf$dval1, na.rm = TRUE)
-# mean(dtf$dval1, na.rm = TRUE)
-# s
-# round(s, 3)
-
 
 # Function definition
 num1d <- function(dataf, nomvar, digits = 2, sumdigits = 2,
@@ -196,7 +163,7 @@ num1d <- function(dataf, nomvar, digits = 2, sumdigits = 2,
         tbflabs <- paste0(100* round(tbf,digits), "%")
         tbl <- data.frame(tb, tbf, tbflabs)
         tbl <- tbl[ , c(1,2,4,5)]
-        colnames(tbl) <- c(nomvar, "num", "perc", "perclabs")
+        colnames(tbl) <- c(nomvar, "num", "rfreq", "perclabs")
         tbl$numlabs = paste0("n=", tbl$num)
         tbl$index <- ave(1:nrow(tbl),  FUN = function(x) 1:length(x)) # rank
         # print(tbl) #dbg
@@ -207,7 +174,9 @@ num1d <- function(dataf, nomvar, digits = 2, sumdigits = 2,
         s["St.dev"] <- sd(dataf[ , nomvar], na.rm = TRUE)
         s <- round(s[c( "Num.", "Mean", "St.dev", "Min.", "1st Qu.", "Median", "3rd Qu.", "Max.", "NA's") ],
                    sumdigits)
-        # print(s)
+        # print(s) # dbg
+        # Goodness-of-Fit chi-square test for a uniform distribution
+        uchisq <- uniform.chisq.test(tbl[,"num"])
 
         # bar chart
         # data+aes
@@ -229,18 +198,9 @@ num1d <- function(dataf, nomvar, digits = 2, sumdigits = 2,
               summaries = s,
               table = tbl,
               num = num,
+              uchisq = uchisq,
               plot = pt)
 }
-
-
-# tests
-res <- num1d(dtf, "dval1")
-
-res$plot + xlab("Exemple") + ylab("Pourcentage")
-
-#
-# res <- num1d(dtf, "dval2", rfreq = FALSE)
-# res$plot
 
 
 

@@ -88,26 +88,67 @@ be treated with as.data.frame() before calling the function.
 ##### Arguments  
 `dataf`  The dataframe   
 `nomfact`  The factor's name   
-`useNA = "no"`  keep or remove missing values ("no" or "ifany" or "never")  
-`orderfreq = TRUE` .......Arguments for `orderfreq`  
+`useNA = "no"`  keep or remove missing values ("no" or "ifany" or "always")  
+`orderfreq = TRUE` ....... Arguments for `orderfreq` ..... 
 `orderdesc = TRUE`  
-`ordervar = "c..nt"`  
-`orderval = NA`  
+`ordervar = "c..nt"`  = variable to use for ordering,  
+`orderval = NA`  = value if the ordering variable is the frequency of ordervar == value
 `orderfun = sum`  
 `rfreq = TRUE` resulting yscale of barchart = relative frequency or absolute  
 `digits = 2`    rounding of relative frequency (2 = whole percentages)  
 `cfill = "steelblue"`   fill of barchart  
 
 ##### Value
-list:  
-*  name = factor name  
-*  levels = factor levels   
-*  table = frequency table  
-*  num = number of observations  
-*  plot =  ggplot bar chart  
+named list:  
+
+*   name = factor name  
+*   levels = factor levels   
+*   table = frequency table  
+*   num = number of observations  
+*   uchisq = Chi-square test for GoF with the uniform distribution (done with chisq.test)  
+*   plot =  ggplot bar chart  
 
 ##### Details    
 
+##### Example  
+
+        mc <- cat1(as.data.frame(mpg), "class")
+        
+        # with plot value labels and cosmetic changes
+        mc$plot +
+                geom_text(data=mc$table , aes( x=class, y = 100 * rfreq - 1.5, 
+                                                label = ifelse(index <= 6, perclabs, ""))) +
+                theme(axis.text.x = element_text(angle=45, hjust=1)) +
+                labs(title = "Class",
+                        x = "",
+                        y = "percentage")
+                        
+        
+        # 2nd example, with ordering by the frequency of a value in another variable
+        mc <- cat1(as.data.frame(mpg), "class", ordervar = "drv", orderval = "4", orderdesc = FALSE)
+        mc$plot +
+                geom_text(data=mc$table , aes( x=class, y = 100 * rfreq - 1.5, 
+                                                label=ifelse(rfreq >= 0.19, perclabs, ""))) +
+                theme(axis.text.x = element_text(angle=45, hjust=1)) +
+                labs(title = "Class", 
+                        x = "",
+                        y = "percentage")
+        # checking if differences may be significant
+        mc$uchisq$p.value
+
+ 
+#### Namefun : Template
+
+##### Usage 
+
+##### Arguments  
+
+##### Value  
+
+##### Details  
+
+##### Example   
+
 
 #### Namefun : Template
 
@@ -119,18 +160,7 @@ list:
 
 ##### Details  
 
-
-
-#### Namefun : Template
-
-##### Usage 
-
-##### Arguments
-
-##### Value  
-
-##### Details  
-
+##### Example  
 
 
 
@@ -143,3 +173,5 @@ list:
 ##### Value  
 
 ##### Details  
+
+##### Example  

@@ -166,27 +166,52 @@ dtf$nam1 <- orderfact(dtf, "nam1", nlevels = levels(aa$nam1)); levels(dtf$nam1)
 #  cat1  =================================================================================
 
 # # usage, essais et tests
-# # ##a
-# tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc = TRUE, cfill = "red")
-# tp$plot
-# tp$table
-# # ##b
-# tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc = FALSE,
-#             ordervar = "cval2", orderfun = mean, cfill = "steelblue")
-# tp$plot
-# tp$table
-#
-# # plot annotation
-# tp$plot + geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=numlabs))
-# tp$plot + geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=perclabs))
-# tp$plot +
-#         geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=ifelse(index <=2,perclabs, "")))+
-#         theme(axis.text.x = element_text(angle=45, hjust=1)) +
-#                  labs(title = "Statut",
-#                       x = "",
-#                       y = "pourcentage")
+# ##a
+tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc = TRUE, cfill = "red")
+tp
+tp$plot
+tp$table
+
+
+# ##b
+tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc = FALSE,
+            ordervar = "cval2", orderfun = mean, cfill = "steelblue")
+tp
+tp$plot
+tp$table
+
+# plot annotation
+tp$plot + geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=numlabs))
+tp$plot + geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=perclabs))
+tp$plot +
+        geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=ifelse(index <=2,perclabs, "")))+
+        theme(axis.text.x = element_text(angle=45, hjust=1)) +
+                 labs(title = "Statut",
+                      x = "",
+                      y = "pourcentage")
 
 # tp$levels are for transferring level order if needed:
+
+## testing with mpg
+mc <- cat1(as.data.frame(mpg), "class")
+mc
+# with plot value labels and cosmetic changes
+mc$plot +
+        geom_text(data=mc$table , aes( x=class, y = 100 * rfreq - 1.5, label=ifelse(index <=6, perclabs, "")))+
+        theme(axis.text.x = element_text(angle=45, hjust=1)) +
+        labs(title = "Class",
+             x = "",
+             y = "percentage")
+
+
+mc <- cat1(as.data.frame(mpg), "class", ordervar = "drv", orderval = "4", orderdesc = FALSE)
+mc$plot +
+        geom_text(data=mc$table , aes( x=class, y = 100 * rfreq - 1.5, label=ifelse(rfreq >= 0.19, perclabs, "")))+
+        theme(axis.text.x = element_text(angle=45, hjust=1)) +
+        labs(title = "Class",
+             x = "",
+             y = "percentage")
+mc$uchisq$p.value
 
 
 
@@ -217,14 +242,18 @@ dtf$nam1 <- orderfact(dtf, "nam1", nlevels = levels(aa$nam1)); levels(dtf$nam1)
 # Function definition
 
 # tests
-# res <- num1d(dtf, "dval1")
-#
-# res$plot + xlab("Exemple") + ylab("Pourcentage")
-#
-# #
-# # res <- num1d(dtf, "dval2", rfreq = FALSE)
-# # res$plot
+# tests
+res <- num1d(dtf, "dval1")
+res
+res$plot + xlab("Exemple") + ylab("Pourcentage")
 
+#
+res <- num1d(dtf, "dval2", rfreq = FALSE)
+res$plot
+res$uchisq
+
+# test with mpg
+num1d(as.data.frame(mpg), "cyl")
 
 
 
@@ -233,24 +262,28 @@ dtf$nam1 <- orderfact(dtf, "nam1", nlevels = levels(aa$nam1)); levels(dtf$nam1)
 
 # ***************************************************************************************
 # TESTS
-# p2 <- cat2(dtf, "nam1", "nam2")
-# p2
-#
-#
-# p2 <- cat2(dtf, "nam1", "nam2", orderfreq1 =TRUE, ordervar1 = "nam2" , orderval1 = "j", orderfun1 = mean)
-# p2
-# print(p2$plot)
-#
-# # plot annotation and data labels
-# p2$plot +
-#         geom_text(data = p2$table$tbl1 , aes(x = nam1, y = .05, label = numlabs)) +
-#         geom_text(data = p2$table$tbl1 , aes(x = nam1,
-#                                              y = percval - 0.03,
-#                                              label = ifelse( index <= 2, perclabs, ""))) +
-#         theme(axis.text.x = element_text(angle=45, hjust=1)) +
-#         labs(title = "Statut",
-#              x = "",
-#              y = "pourcentage")
+p2 <- cat2(dtf, "nam1", "nam2")
+p2
+
+
+p2 <- cat2(dtf, "nam1", "nam2", orderfreq1 =TRUE, ordervar1 = "nam2" , orderval1 = "j", orderfun1 = mean)
+p2
+print(p2$plot)
+
+# plot annotation and data labels
+p2$plot +
+        geom_text(data = p2$table$tbl1 , aes(x = nam1, y = .05, label = numlabs)) +
+        geom_text(data = p2$table$tbl1 , aes(x = nam1,
+                                             y = percval - 0.03,
+                                             label = ifelse( index <= 2, perclabs, ""))) +
+        theme(axis.text.x = element_text(angle=45, hjust=1)) +
+        labs(title = "Statut",
+             x = "",
+             y = "pourcentage")
+
+
+mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "4", orderfun1 = mean)
+mp2
 
 # # tries: get data in ggplot
 # ggplot_build(p2$plot)
