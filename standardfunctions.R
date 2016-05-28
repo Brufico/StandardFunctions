@@ -25,7 +25,9 @@ library(reshape2)
 #         as.data.frame(dt)
 # }
 
-#  New definition
+#  New definition.
+# Attention: ne marche correctement qu'avec des data.frame. Les tbl_df doivent
+# être traitées par as.data.frame avant appel de la fonction
 
 condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
         if (useNA == "no") {
@@ -34,7 +36,7 @@ condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
         dt <-prop.table(table(dataf[ ,nomfact1], dataf[ ,nomfact2] , useNA = useNA),
                         margin = 1)
         dt2 <- as.data.frame(dt)
-        names(dt2) <- c(nomfact1, nomfact2, "perc")
+        names(dt2) <- c(nomfact1, nomfact2, "perc") #pour la compatibilité avec la def ancienne
         dt2
 }
 
@@ -225,18 +227,21 @@ num1d <- function(dataf, nomvar, digits = 2, sumdigits = 2,
 # cat2 ==================================================================
 
 cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
-                 orderfreq1 = TRUE,  orderfreq2 = TRUE, orderdesc1 = TRUE, orderdesc2 = TRUE,
-                 ordervar1 = "c..nt", ordervar2 = "c..nt", orderval1 = NA, orderval2 = NA,
-                 orderfun1 = sum, orderfun2 = sum,
+                 orderfreq1 = TRUE, orderdesc1 = TRUE, ordervar1 = "c..nt",
+                 orderval1 = NA, orderfun1 = sum, nlevel1 =NULL,
+                 orderfreq2 = TRUE, orderdesc2 = TRUE, ordervar2 = "c..nt",
+                 orderval2 = NA, orderfun2 = sum, nlevel2 =NULL,
                  rfreq = TRUE, digits = 2, cfill = "steelblue"){
         # useNA = "always, "ifany" or "no", orderfreq = TRUE  or FALSE, descorder =TRUE or FALSE
         # ordervar = variable to use for ordering
 
         # reordering the levels:
         # nomfact2 first
-        dataf[ ,nomfact2] <-  orderfact(dataf, nomfact2, orderfreq2, orderdesc2, ordervar2, orderval2, orderfun2)
+        dataf[ ,nomfact2] <-  orderfact(dataf, nomfact2, orderfreq2, orderdesc2,
+                                        ordervar2, orderval2, orderfun2, nlevel2)
         # nomfact1
-        if(orderfreq1 == TRUE & ordervar1 == nomfact2 & !is.na(orderval1)){  # cas de l'ordre des fréquences conditionnelles
+        if(orderfreq1 == TRUE &
+           ordervar1 == nomfact2 & !is.na(orderval1)){  # cas de l'ordre des fréquences conditionnelles
                 #print("Frequ cond")
                 tbl <- condfreqtable(dataf, nomfact1, nomfact2,  useNA = "no")
                 #print("apres Frequ cond table")
@@ -248,7 +253,8 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
                                               orderfun = orderfun1) #***************
                 dataf[ , nomfact1] <- orderfact(dataf, nomfact1, nlevels = levels(tbl[,nomfact1]))
         } else { # autres cas
-                dataf[ , nomfact1] <- orderfact(dataf, nomfact1, orderfreq1, orderdesc1, ordervar1, orderval1, orderfun1)
+                dataf[ , nomfact1] <- orderfact(dataf, nomfact1, orderfreq1, orderdesc1,
+                                                ordervar1, orderval1, orderfun1, nlevel1)
         }
 
 #         print(levels(dataf[, nomfact1])) #debug
@@ -295,29 +301,10 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
                   )
 }
 
-# ***************************************************************************************
-# TESTS
-# p2 <- cat2(dtf, "nam1", "nam2")
-# p2
-#
-#
-# p2 <- cat2(dtf, "nam1", "nam2", orderfreq1 =TRUE, ordervar1 = "nam2" , orderval1 = "j", orderfun1 = mean)
-# p2
-# print(p2$plot)
-#
-# # plot annotation and data labels
-# p2$plot +
-#         geom_text(data = p2$table$tbl1 , aes(x = nam1, y = .05, label = numlabs)) +
-#         geom_text(data = p2$table$tbl1 , aes(x = nam1,
-#                                              y = percval - 0.03,
-#                                              label = ifelse( index <= 2, perclabs, ""))) +
-#         theme(axis.text.x = element_text(angle=45, hjust=1)) +
-#         labs(title = "Statut",
-#              x = "",
-#              y = "pourcentage")
 
-# # tries: get data in ggplot
-# ggplot_build(p2$plot)
+
+# # tries: get data in ggplot *****************************
+# ggplot_build(p2$plot) #*********************************
 
 
 

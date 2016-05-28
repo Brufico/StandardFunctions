@@ -288,8 +288,16 @@ p2$plot +
              y = "pourcentage")
 
 
-mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "4", orderfun1 = mean)
+mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "f", orderfun1 = mean)
 mp2
+
+
+mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "4", orderfun1 = mean,
+            orderfreq2 =TRUE, nlevel2 = c("4","r","f"))
+mp2
+
+levels(factor(mpg$drv))
+
 
 # # tries: get data in ggplot
 # ggplot_build(p2$plot)

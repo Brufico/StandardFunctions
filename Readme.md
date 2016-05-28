@@ -6,14 +6,15 @@ each situation , one function will provide the most frequent analysis results.
 Each function should return a list of the following elements:
 
 *   The name(s) of the variable(s) analyzed 
+*   The number of cases
+*   some summaries
 *   one or more tables 
-*   one or more graphs
 *   one or more classical tests most often performed in this situation.
-
+*   one or more graphs (ggplot)
 
 ## _______________________________________________________
 
-## Main functions
+## The main functions
 
 ### One variable
 
@@ -31,32 +32,44 @@ Each function should return a list of the following elements:
 
 ## _______________________________________________________
 
-##  Description
+##  Functions
 
 ###  Helper functions
+  
+
+####______________ 
 
 #### condfreqtable: Make a conditional frequency table for 2 factors  
-##### Syntax 
+
+##### Usage  
+ 
         condfreqtable(dataf, nomfact1, nomfact2, useNA = "no")
 
 ##### Formal arguments  
-`dataf`         the dataframe 
-`nomfact1`      first factor name (string)  
-`nomfact2`      2nd factor name  (string)  
-`useNA = "no"`  keep or remove missing values ("no" or anything else)
+`dataf`         the dataframe  
+`nomfact1`      first factor name (string)   
+`nomfact2`      2nd factor name  (string)   
+`useNA = "no"`  keep or remove missing values ("no" or anything else)  
 
-##### Returns 
-a dataframe: conditional frequency  for `nomfact2` for each value
-of `nomfact1`. Table columns : nomfact1, nomfact2, joint frequency ("num") ,
-conditional relative frequency ("perc")
+##### Value 
+a dataframe: for each value of `nomfact1`, the conditional frequency  for `nomfact2`  
 
+Table columns : nomfact1, nomfact2, joint frequency ("num") , conditional relative frequency ("perc")
+
+##### Details   
+Only works correctly with data.frames, not tbl_df. tbl_df's should
+be treated with as.data.frame() before calling the function.
+
+####______________
 
 #### orderfact : reordering the levels of one factor 
-##### Syntax 
+
+##### Usage
+ 
         orderfact(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE, 
                 ordervar = "c..nt", orderval = NA, orderfun = sum,nlevels = NULL)
 
-##### Formal arguments
+##### Arguments
 
 `dataf`  The dataframe  
 `nomfact`  The factor's name  
@@ -67,7 +80,7 @@ conditional relative frequency ("perc")
 `orderfun = sum`        summary function to use on `ordervar`  
 `nlevels = NULL`  if supplied, directly reorder the levels as given here. Overrides everything else.
 
-##### Returns  
+##### Value  
 The factor, with reordered levels
 
 ##### Details   
@@ -78,6 +91,8 @@ be treated with as.data.frame() before calling the function.
 #### _______________________________________________________
 
 ###  Main functions
+
+####______________  
 
 #### cat1 : Analyze one categorical variable (factor)  
 
@@ -133,22 +148,78 @@ named list:
                 labs(title = "Class", 
                         x = "",
                         y = "percentage")
+        
         # checking if differences may be significant
         mc$uchisq$p.value
 
- 
-#### Namefun : Template
 
-##### Usage 
+####______________  
+
+#### num1d : Analyze one numerical variable (discrete)
+
+##### Usage  
+        num1d(dataf, nomvar, digits = 2, sumdigits = 2,
+                  rfreq = TRUE, useNA ="no",
+                  width = .5, cfill = "steelblue")
 
 ##### Arguments  
+
 
 ##### Value  
 
 ##### Details  
 
+##### Example  
+
+
+
+####______________  
+
+#### cat2 : Analyze two categorical variable (factors) together
+
+##### Usage 
+
+        cat2(dataf, nomfact1, nomfact2,  useNA = "no",
+                 orderfreq1 = TRUE, orderdesc1 = TRUE, ordervar1 = "c..nt",
+                 orderval1 = NA, orderfun1 = sum, nlevel1 =NULL,
+                 orderfreq2 = TRUE, orderdesc2 = TRUE, ordervar2 = "c..nt",
+                 orderval2 = NA, orderfun2 = sum, nlevel2 =NULL,
+                 rfreq = TRUE, digits = 2, cfill = "steelblue")
+
+
+##### Arguments 
+
+`dataf`  The dataframe   
+`nomfact`  The 1st factor's name 
+`nomfact2`
+`useNA` = "no"
+`orderfreq1` = TRUE
+`orderdesc1` = TRUE
+`ordervar1` = "c..nt"
+`orderval1` = NA
+`orderfun1` = sum
+`nlevel1` =NULL
+`orderfreq2` = TRUE
+`orderdesc2` = TRUE
+`ordervar2` = "c..nt"
+`orderval2` = NA
+`orderfun2` = sum
+`nlevel2` =NULL
+`rfreq` = TRUE unused but should mean relative frequency
+`digits` = 2
+`cfill` = "steelblue" (unused)
+ 
+
+##### Value  
+
+
+##### Details  
+
+
 ##### Example   
 
+
+####______________  
 
 #### Namefun : Template
 
@@ -163,6 +234,7 @@ named list:
 ##### Example  
 
 
+####______________  
 
 #### Namefun : Template
 
