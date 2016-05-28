@@ -12,18 +12,35 @@ library(reshape2)
 # helper functions =======================================================
 
 
-# make conditional frequency table
+# # make conditional frequency table old definition
+# condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
+#         if (useNA == "no") {
+#                 dataf <- dataf[!is.na(dataf[ ,nomfact1]) & !is.na(dataf[ ,nomfact2]) ,]
+#         }
+#         dt <-dataf %>%
+#                 group_by_(as.name(nomfact1), as.name(nomfact2)) %>%
+#                 summarise(num = n()) %>%
+#                 mutate(perc = num / sum(num)) %>%
+#                 ungroup
+#         as.data.frame(dt)
+# }
+
+#  New definition
+
 condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
         if (useNA == "no") {
                 dataf <- dataf[!is.na(dataf[ ,nomfact1]) & !is.na(dataf[ ,nomfact2]) ,]
         }
-        dt <-dataf %>%
-                group_by_(as.name(nomfact1), as.name(nomfact2)) %>%
-                summarise(num = n()) %>%
-                mutate(perc = num / sum(num)) %>%
-                ungroup
-        as.data.frame(dt)
+        dt <-prop.table(table(dataf[ ,nomfact1], dataf[ ,nomfact2] , useNA = useNA),
+                        margin = 1)
+        dt2 <- as.data.frame(dt)
+        names(dt2) <- c(nomfact1, nomfact2, "perc")
+        dt2
 }
+
+
+
+
 
 
 #  reorder factor  ===========================================================

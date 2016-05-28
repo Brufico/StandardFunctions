@@ -69,8 +69,14 @@ dtf <- make_testdata()
 
 # aa <- condfreqtable(dtf, "nam1", "nam2")
 # condfreqtable(dtf, "nam1", "nam2")
-# condfreqtable(dtf, "nam1", "dval1", useNA = "yes")
-# Another way: reshape in a crosstab
+# condfreqtable(dtf, "nam1", "dval1", useNA = "always")
+# condfreqtable(dtf, "nam1", "dval1", useNA = "no")
+#
+# # try with mpg
+# condfreqtable(mpg, "class", "drv") # ==> Problem within prop.table(), only works with dataframes
+# condfreqtable(as.data.frame(mpg), "class", "drv")
+
+Another way: reshape in a crosstab
 # dcast(aa, formula = nam1 ~ nam2 , value.var = "perc", drop=FALSE, fill = 0)
 
 
@@ -142,8 +148,8 @@ xy$nam1 <- orderfact(xy, "nam1", ordervar = "perc", orderfun = mean, orderdesc =
 dtf$nam1 <- orderfact(dtf, "nam1", ordervar = "dval2", orderfun = mean, orderdesc = TRUE) ; levels(dtf$nam1)
 
 # reordering in one dframe and transferring order to another
-aa$nam1 <- orderfact(aa, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(aa$nam1)
-dtf$nam1 <- orderfact(dtf, "nam1", nlevels = levels(aa$nam1)); levels(dtf$nam1)
+aba$nam1 <- orderfact(aba, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(aba$nam1)
+dtf$nam1 <- orderfact(dtf, "nam1", nlevels = levels(aba$nam1)); levels(dtf$nam1)
 
 
 # ************************ ================================================================
