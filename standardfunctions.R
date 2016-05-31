@@ -85,11 +85,49 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
 }
 
 # ======================================================================================
-# Statistical Testing functions
-# GOF chi-square test for a uniform distribution
-uniform.chisq.test <- function(ofreq) {
-        chisq.test(ofreq, p = rep(1, length(ofreq)), rescale.p = TRUE)
+# Statistical Testing functions GOF chi-square test for a uniform distribution
+# uniform.chisq.test <- function(ofreq) { chisq.test(ofreq, p = rep(1,
+# length(ofreq)), rescale.p = TRUE) } # semble inutile
+
+
+# identify a  warning
+is.warning <- function(x) {"warning" %in% class(x)}
+
+
+# try.chisq.test ==> essaye un test du chi2, et si il génère un warning
+# (conditions approximation du chi2 non satisfaites), alors, calculer la
+# p-valeur par simulation
+# si keep-all, retourne les 2 tests (chi2 et
+# simulation, une valeur logique indiquant le warning, et le warning lui-même). Le test préférée est alors listé
+
+try.chisq.test <- function(..., keep.all = TRUE) {
+        ww <- tryCatch(chisq.test(...),
+                       error = function(e) {e},
+                       warning = function(w) w )
+
+        if (is.warning(ww)) {
+                if (keep.all) {
+                        list(test1 = chisq.test(..., simulate.p.value = TRUE),
+                             test2 = chisq.test(...),
+                             warning = TRUE,
+                             warningmsg = ww )
+                } else {
+                        list(test1 = chisq.test(..., simulate.p.value = TRUE))
+                }
+        } else {
+                if (keep.all) {
+                        list(test1 = chisq.test(...),
+                             test2 = chisq.test(..., simulate.p.value = TRUE),
+                             warning = FALSE,
+                             warningmsg = "" )
+                } else {
+                        list(test1 = chisq.test(...))
+                }
+        }
 }
+
+
+
 
 
 # ************************ ================================================================
@@ -135,7 +173,7 @@ cat1 <- function(dataf, nomfact, useNA = "no",
         num <- sum(tbl$num)
 
         # Goodness-of-Fit chi-square test for a uniform distribution
-        uchisq <- uniform.chisq.test(tbl[,"num"])
+        uchisq <- try.chisq.test(tbl[,"num"])
 
         # bar chart with ggplot2
         # the data
@@ -172,10 +210,9 @@ cat1 <- function(dataf, nomfact, useNA = "no",
 # num1d ==================================================================
 
 # Function definition
-num1d <- function(dataf, nomvar, digits = 2, sumdigits = 2,
-                  rfreq = TRUE, useNA ="no",
-                  width = .5, cfill = "steelblue") {
-        # make a table (with nb of rows)
+num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
+                  rfreq = TRUE, width = .5, cfill = "steelblue") {
+        # make a table (with Frequency = nb of rows)
         tb <- table(dataf[, nomvar])
         num <- sum(tb)
         tbf <- tb/sum(tb)
@@ -195,7 +232,7 @@ num1d <- function(dataf, nomvar, digits = 2, sumdigits = 2,
                    sumdigits)
         # print(s) # dbg
         # Goodness-of-Fit chi-square test for a uniform distribution
-        uchisq <- uniform.chisq.test(tbl[,"num"])
+        uchisq <- try.chisq.test(tbl[,"num"])
 
         # bar chart
         # data+aes
@@ -279,6 +316,9 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
              }
              tbl1$index <- ave(1:nrow(tbl1),  FUN = function(x) 1:length(x)) # rank
 
+             # Chi-square test for independence
+             ichisq <- try.chisq.test(tblcrois)
+
              #  bar chart with ggplot2
              #  data
              dataf2 <- if (useNA == "no") {
@@ -297,7 +337,10 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
                   levels = list(levels1 =levels(dataf[ , nomfact1]),
                                 levels2 =levels(dataf[ , nomfact2]) ),
                   tables =list(tbl=tbl, tblcrois=tblcrois, tbl1=tbl1, tbl2=tbl2),
-                  num = num, plot = pt
+                  num = num,
+                  ichisq = ichisq,
+                  plot = pt
+
                   )
 }
 

@@ -259,8 +259,9 @@ res$plot
 res$uchisq
 
 # test with mpg
-num1d(as.data.frame(mpg), "cyl")
-
+res <- num1d(as.data.frame(mpg), "cyl")
+res
+res$plot + xlab("Cylinders") + ylab("Percentage")
 
 
 # cat2 ==================================================================
@@ -290,17 +291,52 @@ p2$plot +
 
 mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "f", orderfun1 = mean)
 mp2
+mp2$plot +
+        geom_text(data = mp2$table$tbl1 , aes(x = class, y = -.05, label = numlabs)) +
+        geom_text(data = mp2$table$tbl1 , aes(x = class,
+                                             y = percval - 0.03,
+                                             label = ifelse( index <= 4, perclabs, ""))) +
+        theme(axis.text.x = element_text(angle=45, hjust=1)) +
+        labs(title = "Drive per class",
+             x = "Class",
+             y = "percentage")
 
 
-mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "4", orderfun1 = mean,
+
+
+mp3 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "4", orderfun1 = mean,
             orderfreq2 =TRUE, nlevel2 = c("4","r","f"))
-mp2
+mp3
+mp3$plot +
+        geom_text(data = mp3$table$tbl1 , aes(x = class, y = -.05, label = numlabs)) +
+        geom_text(data = mp3$table$tbl1 , aes(x = class,
+                                              y = percval - 0.03,
+                                              label = ifelse( index <= 4, perclabs, ""))) +
+        theme(axis.text.x = element_text(angle=45, hjust=1))
 
+
+# verification
 levels(factor(mpg$drv))
+
+# # chisquare
+# mp2c <- chisq.test(mp2$tables$tblcrois,simulate.p.value=TRUE)
+# mp2c$method
+# str(mp2c)
+# mp2c$expected
+
 
 
 # # tries: get data in ggplot
 # ggplot_build(p2$plot)
 
 
+mpg
 
+p <- ggplot(mpg, aes(displ, ..density..))+geom_histogram(bins=10)
+p
+m <- ggplot_build(p)
+m
+
+
+p <- ggplot(mpg, aes( 1 , displ))+geom_boxplot()
+p
