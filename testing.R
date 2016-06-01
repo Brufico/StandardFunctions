@@ -5,7 +5,9 @@
 
 library(ggplot2)
 library(dplyr)
-library(reshape2)
+# library(ggplot2movies)
+
+# library(reshape2)
 
 
 # Generate test data ===================================================
@@ -326,17 +328,3 @@ levels(factor(mpg$drv))
 
 
 
-# # tries: get data in ggplot
-# ggplot_build(p2$plot)
-
-
-mpg
-
-p <- ggplot(mpg, aes(displ, ..density..))+geom_histogram(bins=10)
-p
-m <- ggplot_build(p)
-m
-
-
-p <- ggplot(mpg, aes( 1 , displ))+geom_boxplot()
-p
