@@ -81,46 +81,15 @@ dtf <- make_testdata()
 # TEST condfreqtable() -----------------------------------------------
 
 # aa <- condfreqtable(dtf, "nam1", "nam2")
-# condfreqtable(dtf, "nam1", "nam2")
-# condfreqtable(dtf, "nam1", "dval1", useNA = "always")
-# condfreqtable(dtf, "nam1", "dval1", useNA = "no")
-#
-# # try with mpg
-# condfreqtable(mpg, "class", "drv") # ==> Problem within prop.table(), only works with dataframes
-# condfreqtable(as.data.frame(mpg), "class", "drv")
+condfreqtable(dtf, "nam1", "nam2")
+condfreqtable(dtf, "nam1", "dval1", useNA = "always")
+condfreqtable(dtf, "nam1", "dval1", useNA = "no")
 
-# Another way: reshape in a crosstab
-# dcast(aa, formula = nam1 ~ nam2 , value.var = "perc", drop=FALSE, fill = 0)
+# try with mpg
+condfreqtable(mpg, "class", "drv") # ==> Problem within prop.table(), only works with dataframes
+condfreqtable(as.data.frame(mpg), "class", "drv")
 
 
-# Note: my version of reorder (inutile maintenant que j'ai la solution)
-# summaryunique <- function(df, nomfact, nomvar, fun = mean, decreasing=FALSE, outputdf = FALSE) {
-#         # print("summaryunique") ; print("df=") ;print(df); print(nomfact); print(nomvar)
-#         x <- df[, nomfact]
-#         u <- unique(x[!is.na(x)])
-#         values <- split(df, df[ , nomfact]) %>%
-#                 lapply(function(d) fun(d[, nomvar], na.rm=TRUE) ) %>%
-#                 unsplit(u)
-#         if (outputdf) {
-#                 data.frame( level = u, values)
-#         } else {
-#                 u[order(values, decreasing = decreasing)]
-#         }
-# }
-#
-#
-#
-# reorderlevels <- function(df, nomfact, nomvar,fun = mean, decreasing = FALSE) {
-#         lv <- summaryunique(df, nomfact, nomvar, fun=fun, decreasing=decreasing)
-#         factor(df[, nomfact], levels = lv)
-# }
-
-
-# test reorderlevels
-# reorderlevels(dtf,"nam1", "cval1", decreasing = TRUE, fun=max)
-
-
-#  reorder factor  ===========================================================
 
 
 # Tests ==============================================================================================
@@ -149,20 +118,37 @@ dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "cval2", orderfun = mean, orderdesc
 dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "cval2", orderfun = sum, orderdesc = TRUE) ; levels(dtf$nam1)#ok
 dtf$nam1 <- orderfact(dtf,"nam1", ordervar = "nam2", orderval = "j") ; levels(dtf$nam1)
 
-xy$nam1
-xy[,"nam1"]
-xy[,"perc"]
+aba$nam1
+aba[["nam1"]]
+aba[["perc"]]
 
 dtf$nam1 <- orderfact(dtf,"nam1"); levels(dtf$nam1)
 aba$nam1 <- orderfact(aba,"nam1"); levels(aba$nam1)
 abaz$nam1 <- orderfact(abaz,"nam1"); levels(abaz$nam1)
 
-xy$nam1 <- orderfact(xy, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(xy$nam1)
+aba$nam1 <- orderfact(aba, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(aba$nam1)
 dtf$nam1 <- orderfact(dtf, "nam1", ordervar = "dval2", orderfun = mean, orderdesc = TRUE) ; levels(dtf$nam1)
 
 # reordering in one dframe and transferring order to another
 aba$nam1 <- orderfact(aba, "nam1", ordervar = "perc", orderfun = mean, orderdesc = TRUE) ; levels(aba$nam1)
 dtf$nam1 <- orderfact(dtf, "nam1", nlevels = levels(aba$nam1)); levels(dtf$nam1)
+
+
+levels(diamonds[["cut"]])
+diamonds[["cut"]] <- orderfact(diamonds , "cut", ordervar = "price", orderfun = mean, orderdesc = TRUE); levels(diamonds[["cut"]])
+
+mpg[["manufacturer"]] <- factor(mpg[["manufacturer"]])
+levels(mpg[["manufacturer"]])
+mpg[["manufacturer"]] <- orderfact(mpg , "manufacturer", ordervar = "hwy",
+                                   orderfun = mean, orderdesc = TRUE); levels(mpg[["manufacturer"]])
+
+
+mpg[["drv"]] <- factor(mpg[["drv"]]) ; levels(mpg[["drv"]])
+levels(mpg[["manufacturer"]])
+
+mpg[["manufacturer"]] <- orderfact(mpg , "manufacturer", ordervar = "drv", orderval = "4",
+                                   orderfun = sum, orderdesc = TRUE); levels(mpg[["manufacturer"]])
+
 
 
 # ************************ ================================================================
@@ -212,7 +198,7 @@ tp$plot +
 # tp$levels are for transferring level order if needed:
 
 ## testing with mpg
-mc <- cat1(as.data.frame(mpg), "class")
+mc <- cat1(mpg, "class")
 mc
 # with plot value labels and cosmetic changes
 mc$plot +
@@ -223,44 +209,23 @@ mc$plot +
              y = "percentage")
 
 
-mc <- cat1(as.data.frame(mpg), "class", ordervar = "drv", orderval = "4", orderdesc = FALSE)
+mc <- cat1(mpg, "class", ordervar = "drv", orderval = "4", orderdesc = FALSE)
 mc$plot +
         geom_text(data=mc$table , aes( x=class, y = 100 * rfreq - 1.5, label=ifelse(rfreq >= 0.19, perclabs, "")))+
         theme(axis.text.x = element_text(angle=45, hjust=1)) +
         labs(title = "Class",
              x = "",
              y = "percentage")
-mc$uchisq$p.value
+
+# get pvalue
+mc$uchisq$test1$p.value
 
 
 
 
 # num1d ==================================================================
 
-# exploration
-# dtf
-# tb <- table(dtf$dval1)
-# tbf <-tb/sum(tb)
-# tbflabs <- paste0(100* round(tbf,2), "%")
-# data.frame(tb, tbf, tbflabs)
-# ggplot(dtf, aes(x = dval1)) +
-#         geom_bar(width = .5, fill = "steelblue" )
-#
-#
-# s <- summary(dtf$dval1, digits = 2)
-# str(s)
-# s["Min."]
-# s["St.dev"] <- sd(dtf$dval1, na.rm = TRUE)
-# s <-s[c("Mean", "St.dev",  "Min.", "1st Qu.", "Median", "3rd Qu.",  "Max.", "NA's") ]
-# sd(dtf$dval1, na.rm = TRUE)
-# mean(dtf$dval1, na.rm = TRUE)
-# s
-# round(s, 3)
 
-
-# Function definition
-
-# tests
 # tests
 res <- num1d(dtf, "dval1")
 res
@@ -269,12 +234,45 @@ res$plot + xlab("Exemple") + ylab("Pourcentage")
 #
 res <- num1d(dtf, "dval2", rfreq = FALSE)
 res$plot
-res$uchisq
+res$uchisq$test1
 
 # test with mpg
-res <- num1d(as.data.frame(mpg), "cyl")
+res <- num1d(mpg, "cyl")
 res
 res$plot + xlab("Cylinders") + ylab("Percentage")
+
+
+# # tests for num1c ===================================================
+
+num1c(mpg,"hwy")
+num1c(mpg,"hwy", plot_density = TRUE)
+num1c(mpg,"hwy", bins = nclass.FD(mpg$hwy))
+num1c(mpg,"hwy", breaks = seq(from=10,to=42, by=4))
+num1c(mpg,"hwy", breaks = seq(from=11,to=44, by=3))
+num1c(mpg,"hwy", breaks = seq(from=11,to=44, by=3), plot_density = TRUE)
+num1c(mpg,"hwy", usedensity = TRUE, breaks = seq(from=10,to = 45, by=5))
+num1c(mpg,"hwy", plot_density = TRUE, breaks = seq(from=10,to=46, by=4))
+
+
+
+# stem(mpg$cty)
+#
+num1c(mpg,"cty", plot_density = TRUE)
+num1c(mpg,"cty", bins = nclass.FD(mpg$hwy), plot_density = TRUE )
+num1c(mpg,"cty", breaks = seq(from=6,to=36, by=3), plot_density = TRUE)
+ctypt <- num1c(mpg,"cty", breaks = c(6,9,12,15,18,21,24,36), plot_density = TRUE)
+
+ctypt$plot + geom_text(data=ctypt$table, aes(x, y/2, label=perclabs)) +
+        labs(title="City mpg distribution")
+
+
+ctypt$table$ndensity  /ctypt$table$rfreq
+
+
+
+
+
+
 
 
 # cat2 ==================================================================

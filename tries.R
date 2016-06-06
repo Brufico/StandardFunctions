@@ -288,36 +288,8 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
 
 
 
-# # tests
-num1c(mpg,"hwy")
-num1c(mpg,"hwy", plot_density = TRUE)
-num1c(mpg,"hwy", bins = nclass.FD(mpg$hwy))
-num1c(mpg,"hwy", breaks = seq(from=10,to=42, by=4))
-num1c(mpg,"hwy", breaks = seq(from=11,to=44, by=3))
-num1c(mpg,"hwy", usedensity = TRUE, breaks = seq(from=10,to = 45, by=5))
-num1c(mpg,"hwy", plot_density = TRUE, breaks = seq(from=10,to=46, by=4))
-
-
-
-# stem(mpg$cty)
-#
-num1c(mpg,"cty", plot_density = TRUE)
-num1c(mpg,"cty", bins = nclass.FD(mpg$hwy), plot_density = TRUE )
-num1c(mpg,"cty", breaks = seq(from=6,to=36, by=3), plot_density = TRUE)
-ctypt <- num1c(mpg,"cty", breaks = c(6,9,12,15,18,21,24,36), plot_density = TRUE)
-
-ctypt$plot + geom_text(data=ctypt$table, aes(x, y/2, label=perclabs)) +
-        labs(title="City mpg distribution")
-
-
-ctypt$table$ndensity  /ctypt$table$rfreq
 
 # # ======================================
-#
-# seq(from=10,to=47, by=3)
-# max(mpg$hwy)
-# min(mpg$hwy)
-
 
 
 

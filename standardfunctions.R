@@ -127,28 +127,26 @@ condsummaries <- function (dataf, vname, fname) {
 # Frequency tables # ==================================================
 
 
-# # make conditional frequency table old definition
+# # Attention: ne marche correctement qu'avec des data.frame. Les tbl_df doivent
+# # être traitées par as.data.frame avant appel de la fonction
+# # old
 # condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
 #         if (useNA == "no") {
 #                 dataf <- dataf[!is.na(dataf[ ,nomfact1]) & !is.na(dataf[ ,nomfact2]) ,]
 #         }
-#         dt <-dataf %>%
-#                 group_by_(as.name(nomfact1), as.name(nomfact2)) %>%
-#                 summarise(num = n()) %>%
-#                 mutate(perc = num / sum(num)) %>%
-#                 ungroup
-#         as.data.frame(dt)
+#         dt <-prop.table(table(dataf[ ,nomfact1], dataf[ ,nomfact2] , useNA = useNA),
+#                         margin = 1)
+#         dt2 <- as.data.frame(dt)
+#         names(dt2) <- c(nomfact1, nomfact2, "perc") #pour la compatibilité avec la def ancienne
+#         dt2
 # }
 
-#  New definition.
-# Attention: ne marche correctement qu'avec des data.frame. Les tbl_df doivent
-# être traitées par as.data.frame avant appel de la fonction
-
+# new . fonctionne avec des tbl_df aussi
 condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
         if (useNA == "no") {
-                dataf <- dataf[!is.na(dataf[ ,nomfact1]) & !is.na(dataf[ ,nomfact2]) ,]
+                dataf <- dataf[!is.na(dataf[[nomfact1]]) & !is.na(dataf[[nomfact2]]) , ]
         }
-        dt <-prop.table(table(dataf[ ,nomfact1], dataf[ ,nomfact2] , useNA = useNA),
+        dt <-prop.table(table(dataf[[nomfact1]], dataf[[nomfact2]] , useNA = useNA),
                         margin = 1)
         dt2 <- as.data.frame(dt)
         names(dt2) <- c(nomfact1, nomfact2, "perc") #pour la compatibilité avec la def ancienne
@@ -160,11 +158,49 @@ condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
 
 
 
+
+
 #  reorder factor  ===========================================================
 
 # Attention: ne marche correctement qu'avec des data.frame. Les tbl_df doivent
 # être traitées par as.data.frame avant appel de la fonction
+#
+# orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
+#                       ordervar = "c..nt", orderval = NA, orderfun = sum,
+#                       nlevels = NULL) {
+#         if (is.null(nlevels)) {
+#                 direction <- ifelse(orderdesc,-1, 1)
+#
+#                 if (orderfreq & ordervar == "c..nt") {
+#                         dataf$c..nt <- c(1)
+#                 }
+#                 if (is.na(orderval) & ordervar == "c..nt") {
+#                         dataf$c..nt <- c(1)
+#                 } else if (is.na(orderval) & ordervar != "c..nt") {
+#                         # dataf$c..nt <- ifelse(is.na(dataf[, ordervar]), 0, 1)
+#                         #
+#                         # ordervar <- "c..nt"
+#                         # ne rien faire ??
+#                 } else {
+#                         dataf$c..nt <-
+#                                 ifelse(is.na(dataf[, ordervar]), 0 , ifelse(dataf[, ordervar] == orderval, 1, 0))
+#                         ordervar <- "c..nt"
+#                 }
+#                 # réordonner le facteur
+#                 xx <- dataf[,nomfact]
+#                 xxx <- direction * dataf[ , ordervar]
+#                 resfact <- reorder(xx, xxx, orderfun, na.rm = TRUE)
+#
+#
+#         } else {
+#                 resfact <- factor(dataf[,nomfact], levels = nlevels)
+#         }
+#         # retour
+#         resfact
+# }
+#
 
+# new definition seems ok
 orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
                       ordervar = "c..nt", orderval = NA, orderfun = sum,
                       nlevels = NULL) {
@@ -183,12 +219,12 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
                         # ne rien faire ??
                 } else {
                         dataf$c..nt <-
-                                ifelse(is.na(dataf[, ordervar]), 0 , ifelse(dataf[, ordervar] == orderval, 1, 0))
+                                ifelse(is.na(dataf[[ordervar]]), 0 , ifelse(dataf[[ordervar]] == orderval, 1, 0))
                         ordervar <- "c..nt"
                 }
                 # réordonner le facteur
-                xx <- dataf[,nomfact]
-                xxx <- direction * dataf[ , ordervar]
+                xx <- dataf[[nomfact]]
+                xxx <- direction * dataf[[ordervar]]
                 resfact <- reorder(xx, xxx, orderfun, na.rm = TRUE)
 
 
@@ -263,7 +299,62 @@ try.chisq.test <- function(..., keep.all = TRUE) {
 
 
 #  cat1  =================================================================================
+#
+# cat1 <- function(dataf, nomfact, useNA = "no",
+#                  orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
+#                  orderval = NA, orderfun = sum,
+#                  rfreq = TRUE, digits = 2, cfill = "steelblue") {
+#         # useNA = "always, "ifany" or "no", orderfreq = TRUE  or FALSE, descorder =TRUE or FALSE
+#         # ordervar = variable to use for ordering,
+#         # orderval = value if the ordering variable is the frequency of ordervar == value
+#
+#         # reordering the levels:
+#         dataf[,nomfact] <-
+#                 orderfact(dataf, nomfact, orderfreq, orderdesc, ordervar, orderval, orderfun)
+#
+#         # make table as dataframe
+#         tbl <- table(dataf[, nomfact], useNA = useNA)
+#         tbl <- data.frame(num = tbl, rfreq = tbl / sum(tbl))
+#         tbl <- tbl[, c(1,2,4)]
+#         names(tbl) <- c(nomfact, "num", "rfreq")
+#         tbl$numlabs <- paste0("n=" ,tbl$num)
+#         tbl$perclabs <- paste0(100 * round(tbl$rfreq, digits),"%")
+#         tbl$index <- ave(1:nrow(tbl),  FUN = function(x) 1:length(x)) # rank
+#         num <- sum(tbl$num)
+#
+#         # Goodness-of-Fit chi-square test for a uniform distribution
+#         uchisq <- try.chisq.test(tbl[,"num"])
+#
+#         # bar chart with ggplot2
+#         # the data
+#         dataf1 <- if (useNA == "no") {
+#                 dataf[which(!is.na(dataf[, nomfact])), ]
+#         } else {
+#                 dataf
+#         }
+#         # base ggplot
+#         pt <- if (rfreq) {
+#                 ggplot(dataf1,
+#                        aes_(as.name(nomfact), quote(100 * ..count.. / sum(..count..))))
+#         } else {
+#                 ggplot(dataf1,
+#                        aes_(as.name(nomfact)))
+#         }
+#         # geom
+#         pt <- pt + geom_bar(fill = cfill)
+#         # ylabel
+#         if (rfreq) {pt <- pt + ylab(label = "percent")}
+#
+#         # return a list of values
+#         list(   name = nomfact,
+#                 levels = levels(dataf[, nomfact]),
+#                 table = tbl, num = num,
+#                 uchisq = uchisq,
+#                 plot = pt
+#         )
+# }
 
+# new definition OK
 cat1 <- function(dataf, nomfact, useNA = "no",
                  orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
                  orderval = NA, orderfun = sum,
@@ -273,11 +364,11 @@ cat1 <- function(dataf, nomfact, useNA = "no",
         # orderval = value if the ordering variable is the frequency of ordervar == value
 
         # reordering the levels:
-        dataf[,nomfact] <-
+        dataf[[nomfact]] <-
                 orderfact(dataf, nomfact, orderfreq, orderdesc, ordervar, orderval, orderfun)
 
         # make table as dataframe
-        tbl <- table(dataf[, nomfact], useNA = useNA)
+        tbl <- table(dataf[[nomfact]], useNA = useNA)
         tbl <- data.frame(num = tbl, rfreq = tbl / sum(tbl))
         tbl <- tbl[, c(1,2,4)]
         names(tbl) <- c(nomfact, "num", "rfreq")
@@ -287,12 +378,12 @@ cat1 <- function(dataf, nomfact, useNA = "no",
         num <- sum(tbl$num)
 
         # Goodness-of-Fit chi-square test for a uniform distribution
-        uchisq <- try.chisq.test(tbl[,"num"])
+        uchisq <- try.chisq.test(tbl[["num"]])
 
         # bar chart with ggplot2
         # the data
         dataf1 <- if (useNA == "no") {
-                dataf[which(!is.na(dataf[, nomfact])), ]
+                dataf[which(!is.na(dataf[[nomfact]])), ]
         } else {
                 dataf
         }
@@ -311,7 +402,7 @@ cat1 <- function(dataf, nomfact, useNA = "no",
 
         # return a list of values
         list(   name = nomfact,
-                levels = levels(dataf[, nomfact]),
+                levels = levels(dataf[[nomfact]]),
                 table = tbl, num = num,
                 uchisq = uchisq,
                 plot = pt
@@ -319,15 +410,64 @@ cat1 <- function(dataf, nomfact, useNA = "no",
 }
 
 
-
-
 # num1d ==================================================================
 
 # Function definition
+# num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
+#                   rfreq = TRUE, width = .5, cfill = "steelblue") {
+#         # make a table (with Frequency = nb of rows)
+#         tb <- table(dataf[, nomvar])
+#         num <- sum(tb)
+#         tbf <- tb/sum(tb)
+#         tbflabs <- paste0(100* round(tbf,digits), "%")
+#         tbl <- data.frame(tb, tbf, tbflabs)
+#         tbl <- tbl[ , c(1,2,4,5)]
+#         colnames(tbl) <-  c(nomvar, "num", "rfreq", "perclabs")
+#         tbl$numlabs  <-  paste0("n=", tbl$num)
+#         tbl$index <- ave(1:nrow(tbl),  FUN = function(x) 1:length(x)) # rank
+#         # print(tbl) #dbg
+#
+#         # make summaries
+#         # s = summary(dataf[ , nomvar])
+#         # s["Num."] <- num
+#         # s["St.dev"] <- sd(dataf[ , nomvar], na.rm = TRUE)
+#         # s <- round(s[c( "Num.", "Mean", "St.dev", "Min.", "1st Qu.", "Median", "3rd Qu.", "Max.", "NA's") ],
+#         #            sumdigits)
+#         s <- sumvector(dataf[[nomvar]])
+#
+#         # Goodness-of-Fit chi-square test for a uniform distribution
+#         uchisq <- try.chisq.test(tbl[,"num"])
+#
+#         # bar chart
+#         # data+aes
+#         if (rfreq) {
+#                 pt <- ggplot( if (useNA == "no") { dataf[which(!is.na(dataf[ , nomvar])), ]} else {dataf},
+#                               aes_(as.name(nomvar), quote(100 * ..count.. / sum(..count..))) )
+#         } else {
+#                 pt <- ggplot( if (useNA == "no") { dataf[which(!is.na(dataf[ , nomvar])), ]} else {dataf},
+#                               aes_(as.name(nomvar)) )
+#         }
+#         # geom
+#         pt <- pt + geom_bar(width = width, fill = cfill )
+#         # ylabel
+#         if (rfreq) {pt <- pt + ylab("percent")}
+#
+#
+#         # return a list of values
+#         list( name = nomvar,
+#               summaries = s,
+#               table = tbl,
+#               num = num,
+#               uchisq = uchisq,
+#               plot = pt)
+# }
+
+
+# new definition:
 num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
                   rfreq = TRUE, width = .5, cfill = "steelblue") {
         # make a table (with Frequency = nb of rows)
-        tb <- table(dataf[, nomvar])
+        tb <- table(dataf[[nomvar]])
         num <- sum(tb)
         tbf <- tb/sum(tb)
         tbflabs <- paste0(100* round(tbf,digits), "%")
@@ -338,24 +478,18 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
         tbl$index <- ave(1:nrow(tbl),  FUN = function(x) 1:length(x)) # rank
         # print(tbl) #dbg
 
-        # make summaries
-        # s = summary(dataf[ , nomvar])
-        # s["Num."] <- num
-        # s["St.dev"] <- sd(dataf[ , nomvar], na.rm = TRUE)
-        # s <- round(s[c( "Num.", "Mean", "St.dev", "Min.", "1st Qu.", "Median", "3rd Qu.", "Max.", "NA's") ],
-        #            sumdigits)
         s <- sumvector(dataf[[nomvar]])
 
         # Goodness-of-Fit chi-square test for a uniform distribution
-        uchisq <- try.chisq.test(tbl[,"num"])
+        uchisq <- try.chisq.test(tbl[["num"]])
 
         # bar chart
         # data+aes
         if (rfreq) {
-                pt <- ggplot( if (useNA == "no") { dataf[which(!is.na(dataf[ , nomvar])), ]} else {dataf},
+                pt <- ggplot( if (useNA == "no") { dataf[which(!is.na(dataf[[nomvar]])), ]} else {dataf},
                               aes_(as.name(nomvar), quote(100 * ..count.. / sum(..count..))) )
         } else {
-                pt <- ggplot( if (useNA == "no") { dataf[which(!is.na(dataf[ , nomvar])), ]} else {dataf},
+                pt <- ggplot( if (useNA == "no") { dataf[which(!is.na(dataf[[nomvar]])), ]} else {dataf},
                               aes_(as.name(nomvar)) )
         }
         # geom
@@ -373,6 +507,8 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
               plot = pt)
 }
 
+
+
 # num1c ==================================================================
 
 
@@ -386,7 +522,7 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
         if (plot_density) {p <- p + geom_density(color=color_density) }
         # make summaries vector
         s = sumvector(dataf[[nomvar]])
-        num = s["num"] # number of cases
+        num = s["n"] # number of cases
 
         # get the frequency table
         tb <- ggplot_build(p)$data[[1]][ , 1:8]
@@ -418,6 +554,91 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
 
 
 # cat2 ==================================================================
+#
+# cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
+#                  orderfreq1 = TRUE, orderdesc1 = TRUE, ordervar1 = "c..nt",
+#                  orderval1 = NA, orderfun1 = sum, nlevel1 =NULL,
+#                  orderfreq2 = TRUE, orderdesc2 = TRUE, ordervar2 = "c..nt",
+#                  orderval2 = NA, orderfun2 = sum, nlevel2 =NULL,
+#                  rfreq = TRUE, digits = 2, cfill = "steelblue"){
+#         # useNA = "always, "ifany" or "no", orderfreq = TRUE  or FALSE, descorder =TRUE or FALSE
+#         # ordervar = variable to use for ordering
+#
+#         # reordering the levels:
+#         # nomfact2 first
+#         dataf[[nomfact2]] <-  orderfact(dataf, nomfact2, orderfreq2, orderdesc2,
+#                                         ordervar2, orderval2, orderfun2, nlevel2)
+#         # nomfact1
+#         if(orderfreq1 == TRUE &
+#            ordervar1 == nomfact2 & !is.na(orderval1)){  # cas de l'ordre des fréquences conditionnelles
+#                 #print("Frequ cond")
+#                 tbl <- condfreqtable(dataf, nomfact1, nomfact2,  useNA = "no")
+#                 #print("apres Frequ cond table")
+#                 tbl <- tbl[tbl[[nomfact2]] == orderval1, ]
+#                 # print("tbl") #dbg
+#                 # print(tbl) #dbg
+#                 tbl[ , nomfact1] <- orderfact(tbl, nomfact1,
+#                                               orderfreq1, orderdesc1, ordervar = "perc",
+#                                               orderfun = orderfun1) #***************
+#                 dataf[ , nomfact1] <- orderfact(dataf, nomfact1, nlevels = levels(tbl[,nomfact1]))
+#         } else { # autres cas
+#                 dataf[ , nomfact1] <- orderfact(dataf, nomfact1, orderfreq1, orderdesc1,
+#                                                 ordervar1, orderval1, orderfun1, nlevel1)
+#         }
+#
+# #         print(levels(dataf[, nomfact1])) #debug
+# #         print(levels(dataf[, nomfact2])) #debug
+#         # make table as dataframe
+#         tblcrois <- table(dataf[ , nomfact1], dataf[ , nomfact2], useNA = useNA)
+#
+#              tbl <- as.data.frame(tblcrois)
+#              colnames(tbl) <- c(nomfact1,nomfact2,"num")
+#              # print(tbl) #debug
+#              num <- sum(tbl$num)
+#
+#              tbl1 <- summarize_(group_by_(tbl,as.name(nomfact1)), num=quote(sum(num))) # shit with non-standard eval
+#              tbl2 <- summarize_(group_by_(tbl,as.name(nomfact2)), num=quote(sum(num))) # shit with non-standard eval
+#
+#              # supplement tbl1
+#              tbl1$numlabs = paste0("n=", tbl1$num)
+#              if (!is.na(orderval1)){
+#                      tbl1$numval <- tblcrois[ ,orderval1]
+#                      tbl1$percval <- tbl1$numval / tbl1$num
+#                      tbl1$perclabs <- paste0(100 * round(tbl1$percval, digits), "%")
+#              }
+#              tbl1$index <- ave(1:nrow(tbl1),  FUN = function(x) 1:length(x)) # rank
+#
+#              # Chi-square test for independence
+#              ichisq <- try.chisq.test(tblcrois)
+#
+#              #  bar chart with ggplot2
+#              #  data
+#              dataf2 <- if (useNA == "no") {
+#                      dataf[which(!is.na(dataf[, nomfact1]) &
+#                                          !is.na(dataf[, nomfact2])),]
+#              } else {dataf
+#              }
+#              #  plot
+#              pt <- ggplot(dataf2) +
+#                      geom_bar(aes_(as.name(nomfact1), fill = as.name(nomfact2)), position = "Fill") +
+#                      guides(fill = guide_legend(reverse = TRUE)) +
+#                      ylab("percent")
+#
+#              #retourner les éléments
+#              list(name = c(nomfact1, nomfact2),
+#                   levels = list(levels1 =levels(dataf[ , nomfact1]),
+#                                 levels2 =levels(dataf[ , nomfact2]) ),
+#                   tables =list(tbl=tbl, tblcrois=tblcrois, tbl1=tbl1, tbl2=tbl2),
+#                   num = num,
+#                   ichisq = ichisq,
+#                   plot = pt
+#
+#                   )
+# }
+
+
+# caté New def ==================================================================
+
 
 cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
                  orderfreq1 = TRUE, orderdesc1 = TRUE, ordervar1 = "c..nt",
@@ -430,7 +651,7 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
 
         # reordering the levels:
         # nomfact2 first
-        dataf[ ,nomfact2] <-  orderfact(dataf, nomfact2, orderfreq2, orderdesc2,
+        dataf[[nomfact2]] <-  orderfact(dataf, nomfact2, orderfreq2, orderdesc2,
                                         ordervar2, orderval2, orderfun2, nlevel2)
         # nomfact1
         if(orderfreq1 == TRUE &
@@ -438,72 +659,66 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
                 #print("Frequ cond")
                 tbl <- condfreqtable(dataf, nomfact1, nomfact2,  useNA = "no")
                 #print("apres Frequ cond table")
-                tbl <- tbl[tbl[,nomfact2] == orderval1, ]
+                tbl <- tbl[tbl[[nomfact2]] == orderval1, ]
                 # print("tbl") #dbg
                 # print(tbl) #dbg
-                tbl[ , nomfact1] <- orderfact(tbl, nomfact1,
+                tbl[[nomfact1]] <- orderfact(tbl, nomfact1,
                                               orderfreq1, orderdesc1, ordervar = "perc",
                                               orderfun = orderfun1) #***************
-                dataf[ , nomfact1] <- orderfact(dataf, nomfact1, nlevels = levels(tbl[,nomfact1]))
+                dataf[[nomfact1]] <- orderfact(dataf, nomfact1, nlevels = levels(tbl[,nomfact1]))
         } else { # autres cas
-                dataf[ , nomfact1] <- orderfact(dataf, nomfact1, orderfreq1, orderdesc1,
+                dataf[[nomfact1]] <- orderfact(dataf, nomfact1, orderfreq1, orderdesc1,
                                                 ordervar1, orderval1, orderfun1, nlevel1)
         }
 
-#         print(levels(dataf[, nomfact1])) #debug
-#         print(levels(dataf[, nomfact2])) #debug
+        #         print(levels(dataf[[nomfact1]])) #debug
+        #         print(levels(dataf[[nomfact2]])) #debug
         # make table as dataframe
-        tblcrois <- table(dataf[ , nomfact1], dataf[ , nomfact2], useNA = useNA)
+        tblcrois <- table(dataf[[nomfact1]], dataf[[nomfact2]], useNA = useNA)
 
-             tbl <- as.data.frame(tblcrois)
-             colnames(tbl) <- c(nomfact1,nomfact2,"num")
-             # print(tbl) #debug
-             num <- sum(tbl$num)
+        tbl <- as.data.frame(tblcrois)
+        colnames(tbl) <- c(nomfact1,nomfact2,"num")
+        # print(tbl) #debug
+        num <- sum(tbl$num)
 
-             tbl1 <- summarize_(group_by_(tbl,as.name(nomfact1)), num=quote(sum(num))) # shit with non-standard eval
-             tbl2 <- summarize_(group_by_(tbl,as.name(nomfact2)), num=quote(sum(num))) # shit with non-standard eval
+        tbl1 <- summarize_(group_by_(tbl,as.name(nomfact1)), num=quote(sum(num))) # shit with non-standard eval
+        tbl2 <- summarize_(group_by_(tbl,as.name(nomfact2)), num=quote(sum(num))) # shit with non-standard eval
 
-             # supplement tbl1
-             tbl1$numlabs = paste0("n=", tbl1$num)
-             if (!is.na(orderval1)){
-                     tbl1$numval <- tblcrois[ ,orderval1]
-                     tbl1$percval <- tbl1$numval / tbl1$num
-                     tbl1$perclabs <- paste0(100 * round(tbl1$percval, digits), "%")
-             }
-             tbl1$index <- ave(1:nrow(tbl1),  FUN = function(x) 1:length(x)) # rank
+        # supplement tbl1
+        tbl1$numlabs = paste0("n=", tbl1$num)
+        if (!is.na(orderval1)){
+                tbl1$numval <- tblcrois[ ,orderval1] # keep it, not a df
+                tbl1$percval <- tbl1$numval / tbl1$num
+                tbl1$perclabs <- paste0(100 * round(tbl1$percval, digits), "%")
+        }
+        tbl1$index <- ave(1:nrow(tbl1),  FUN = function(x) 1:length(x)) # rank
 
-             # Chi-square test for independence
-             ichisq <- try.chisq.test(tblcrois)
+        # Chi-square test for independence
+        ichisq <- try.chisq.test(tblcrois)
 
-             #  bar chart with ggplot2
-             #  data
-             dataf2 <- if (useNA == "no") {
-                     dataf[which(!is.na(dataf[, nomfact1]) &
-                                         !is.na(dataf[, nomfact2])),]
-             } else {dataf
-             }
-             #  plot
-             pt <- ggplot(dataf2) +
-                     geom_bar(aes_(as.name(nomfact1), fill = as.name(nomfact2)), position = "Fill") +
-                     guides(fill = guide_legend(reverse = TRUE)) +
-                     ylab("percent")
+        #  bar chart with ggplot2
+        #  data
+        dataf2 <- if (useNA == "no") {
+                dataf[which(!is.na(dataf[[nomfact1]]) &
+                                    !is.na(dataf[[nomfact2]])), ]
+        } else {dataf
+        }
+        #  plot
+        pt <- ggplot(dataf2) +
+                geom_bar(aes_(as.name(nomfact1), fill = as.name(nomfact2)), position = "Fill") +
+                guides(fill = guide_legend(reverse = TRUE)) +
+                ylab("percent")
 
-             #retourner les éléments
-             list(name = c(nomfact1, nomfact2),
-                  levels = list(levels1 =levels(dataf[ , nomfact1]),
-                                levels2 =levels(dataf[ , nomfact2]) ),
-                  tables =list(tbl=tbl, tblcrois=tblcrois, tbl1=tbl1, tbl2=tbl2),
-                  num = num,
-                  ichisq = ichisq,
-                  plot = pt
+        #retourner les éléments
+        list(name = c(nomfact1, nomfact2),
+             levels = list(levels1 =levels(dataf[[nomfact1]]),
+                           levels2 =levels(dataf[[nomfact2]]) ),
+             tables =list(tbl=tbl, tblcrois=tblcrois, tbl1=tbl1, tbl2=tbl2),
+             num = num,
+             ichisq = ichisq,
+             plot = pt
 
-                  )
+        )
 }
-
-
-
-
-# cat1 ==================================================================
-
 
 
