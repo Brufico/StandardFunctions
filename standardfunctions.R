@@ -8,9 +8,120 @@ library(dplyr)
 
 #library(reshape2)
 
+# constants and Default options settings  ===============================
+
+sfinitdefaults <- function () {
+        # structure definition
+        defaultvalue <- list( #namesum
+                namesumeng = c("n", "Mean", "St.dev",
+                               "Min.", "1st Qu.","Median", "3rd Qu.",  "Max.",
+                               " NA's"),
+                namesumfrench  = c("n", "Moyenne", "Ecart-type",
+                                   "Min.", "Q1","Médiane", "Q3",  "Max.",
+                                   " NA's"),
+                namesum ="",
+                language = "",
+                filldefault = "steelblue")
+        # access function
+        function(name=NULL, value = NULL){
+                if(is.null(name)) {
+                        warning("initdefaults : You must supply a name",
+                                immediate. = TRUE, call. = TRUE)
+                        NULL
+                } else {
+                        if (!is.null(value)) {
+                                defaultvalue[[name]] <<- value
+                                defaultvalue[[name]]
+                        } else {defaultvalue[[name]]}
+                }
+        }
+}
+
+
+# set up access function and some defaults
+sfdefault <- sfinitdefaults()
+
+sfdefault("language","french")
+if(sfdefault("language") == "french") {
+        sfdefault("namesum", sfdefault("namesumfrench"))
+} else {
+        sfdefault("namesum", sfdefault("namesumeng"))
+}
+sfdefault("reportNA", FALSE) # report number of NA's in a variable?
+
+# must do the same for digits !
+
+
+
 
 # ***************** ======================================================
 # helper functions =======================================================
+# *****************=======================================================
+
+
+# simple and multiple summary tables # =======================================
+# (nb of cases, mean, stdev, five-number-summary, optionally nb of NA's)
+
+# vector of summaries for 1 quant variable
+sumvector <- function (var, dnames = sfdefault("namesum"), reportNA = sfdefault("reportNA")) {
+        if (length(var) == 0) {
+                sapply(numeric(length = 9), function(x) NA)
+        }else {# construct a more complete summary vector
+                s <- summary(var)
+                if (length(s) < 7) {s <- c(s, rep(0, times=7-length(s)))}
+                ret <- numeric(3)
+                ret[1] <- sum(!is.na(var))
+                ret[2] <-  s["Mean"]
+                ret[3] <- sd(var, na.rm = TRUE)
+                s <- c(ret, s[-4])
+                names(s) <- dnames
+                if (reportNA) {s} else {s[1:(length(s) - 1)] }
+        }
+}
+
+
+# combined summaries for different variables in a dataframe, for all individuals
+cbsummaries <- function (dataf, vnames) {
+        # vnames = a vector of variable names (each a numeric variable of dataf)
+        lsum = lapply(vnames, function(nam) sumvector(dataf[[nam]]))
+        df <- do.call(what = data.frame, args = lsum)
+        colnames(df) <- vnames
+        # rownames(df) <- namesum
+        df
+}
+
+
+
+# combined summaries for one variable, conditional to the values of a factor
+condsummaries <- function (dataf, vname, fname) {
+        # vname = the variable name
+        # fname = the factor name
+        # levels: if not factor, make it a factor and take the levels
+        if (is.factor(dataf[[fname]])) {
+                lv <- levels(dataf[[fname]])
+        } else {
+                lv <- levels(factor(dataf[[fname]]))
+        }
+        lsum = lapply(lv ,
+                      FUN=function(lev) {
+                              dt <- dataf[dataf[[fname]]==lev , ]
+                              sumvector(dt[[vname]])
+                      } )
+        df <- do.call(what = data.frame, args = lsum)
+        colnames(df) <- lv
+        # rownames(df) <- namesum # rownames are preserved
+        df
+}
+
+
+
+
+
+
+
+
+
+# Frequency tables # ==================================================
 
 
 # # make conditional frequency table old definition
@@ -132,15 +243,17 @@ try.chisq.test <- function(..., keep.all = TRUE) {
 
 
 # ************************ ================================================================
-# fonctions de tri simples ================================================================
+# Fonctions d'analyse simples =============================================================
+# ************************ ================================================================
 #
-# * une variable ***********************
+#
+# * une variable xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #
 # cat1  1 facteur
 # num1c 1 variable continue
 # num1d 1 variables discrete
 #
-# # * deux variables ***********************
+# # * deux variables xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #
 # cat2  2 facteurs
 # cat1num1
@@ -149,7 +262,6 @@ try.chisq.test <- function(..., keep.all = TRUE) {
 
 
 #  cat1  =================================================================================
-
 
 cat1 <- function(dataf, nomfact, useNA = "no",
                  orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
@@ -220,18 +332,19 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
         tbflabs <- paste0(100* round(tbf,digits), "%")
         tbl <- data.frame(tb, tbf, tbflabs)
         tbl <- tbl[ , c(1,2,4,5)]
-        colnames(tbl) <- c(nomvar, "num", "rfreq", "perclabs")
-        tbl$numlabs = paste0("n=", tbl$num)
+        colnames(tbl) <-  c(nomvar, "num", "rfreq", "perclabs")
+        tbl$numlabs  <-  paste0("n=", tbl$num)
         tbl$index <- ave(1:nrow(tbl),  FUN = function(x) 1:length(x)) # rank
         # print(tbl) #dbg
 
         # make summaries
-        s = summary(dataf[ , nomvar])
-        s["Num."] <- num
-        s["St.dev"] <- sd(dataf[ , nomvar], na.rm = TRUE)
-        s <- round(s[c( "Num.", "Mean", "St.dev", "Min.", "1st Qu.", "Median", "3rd Qu.", "Max.", "NA's") ],
-                   sumdigits)
-        # print(s) # dbg
+        # s = summary(dataf[ , nomvar])
+        # s["Num."] <- num
+        # s["St.dev"] <- sd(dataf[ , nomvar], na.rm = TRUE)
+        # s <- round(s[c( "Num.", "Mean", "St.dev", "Min.", "1st Qu.", "Median", "3rd Qu.", "Max.", "NA's") ],
+        #            sumdigits)
+        s <- sumvector(dataf[[nomvar]])
+
         # Goodness-of-Fit chi-square test for a uniform distribution
         uchisq <- try.chisq.test(tbl[,"num"])
 
@@ -258,6 +371,47 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
               uchisq = uchisq,
               plot = pt)
 }
+
+# num1c ==================================================================
+
+
+num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
+                  fillhist = "steelblue", color_density = "red", digits = 2, # à modifier
+                  bins = NULL, ...) {  # ... = addtl arguments for geom_hist
+        if (plot_density) {usedensity <- TRUE} # plot_density overrides usedensity
+        p <- ggplot(mpg, aes_(as.name(nomvar))) +
+                if (usedensity) {geom_histogram(aes(y=..density..),bins = bins, fill = fillhist,...)
+                } else {geom_histogram(bins = bins, fill = fillhist, ...)}
+        if (plot_density) {p <- p + geom_density(color=color_density) }
+        # make summaries vector
+        s = sumvector(dataf[[nomvar]])
+        num = s["num"] # number of cases
+
+        # get the frequency table
+        tb <- ggplot_build(p)$data[[1]][ , 1:8]
+        # add  columns to it
+        tb$rfreq <- tb$count/num
+        tb$numlabs <-  paste0("n=", tb$count)
+        tb$perclabs <- paste0(100* round(tb$rfreq, digits), "%")
+        tb$index <- ave(1:nrow(tb),  FUN = function(x) 1:length(x)) # rank
+
+        # Uniform Chi2 test
+        uchisq <- try.chisq.test(tb$count)
+        if (length(unique(round(tb$xmax-tb$xmin,digits))) >= 2) {
+                warning(paste0("Uchisq ", nomvar, " with different class widths!!", call. = TRUE)) }
+
+        # return named list
+        list(name = nomvar,
+             summaries = s,
+             table = tb,
+             num = num,
+             uchisq = uchisq,
+             plot = p)
+}
+
+
+
+
 
 
 
@@ -347,8 +501,8 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
 
 
 
-# # tries: get data in ggplot *****************************
-# ggplot_build(p2$plot) #*********************************
+
+# cat1 ==================================================================
 
 
 

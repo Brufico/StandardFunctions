@@ -7,49 +7,47 @@ output:
     highlight: textmate
     theme: journal
     toc: yes
-    toc_float: yes
+    toc_float: no
+  pdf_document:
+    toc: yes
   word_document: default
 ---
 
-<hr />
+
 # Overview
 
 ## Motivation  
 Here is an attempt to build a set of very basic tools for statistical analysis. For
-each situation, ie each combination of types of variable being analyzes , 
-one function will provide the most frequent analysis results.
+each situation, ie each combination of types of thr variables being analyzed , 
+one function will provide the most frequently useful analysis elements.
 
-Each function should return a list of the following elements:
+Each main function should return a list of the following elements:
 
-*   The name(s) of the variable(s) analyzed 
-*   The number of cases
-*   some summaries
-*   one or more tables 
-*   one or more classical tests most often performed in this situation.
-*   one or more graphs (ggplot)
+* The name(s) of the variable(s) analyzed 
+* The number of (valid) cases
+* some summaries
+* one or more tables 
+* one or more classical tests most often performed in this situation.
+* one or more graphs (ggplot)
 
 
-## The main functions
+## The main functions  
 
-### One variable
-
-*  cat1         : 1 categorical variable (factor)   
-*  num1c        : 1 (continuous) numeric variable   
-*  num1d        : 1 (discrete) numeric variable   
-
+### One variable  
+* cat1 :  1 categorical variable (factor)
+* num1c :  1 (continuous) numeric variable
+* num1d :  1 (discrete) numeric variable
 
 ### Two variables  
 
-*  cat2         :       2 factors  
-*  cat1num1     :       1 categorical variable (factor) + 1 (discrete) numeric variable 
-*  num2         :       2 numeric variables
+*  cat2 :  2 factors
+*  cat1num1 :  1 categorical variable (factor) + 1 (discrete) numeric variable
+*  num2 :  2 numeric variables
 
 
 
 
-#  Analysis Functions
-
-##  Helper functions  
+# Functions Desctiption: Helper functions  
   
 
 ### condfreqtable: Make a conditional frequency table for 2 factors  
@@ -84,15 +82,17 @@ be treated with as.data.frame() before calling the function.
 ### orderfact : reordering the levels of one factor 
 
 #### Usage
- 
-        orderfact(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE, 
-                ordervar = "c..nt", orderval = NA, orderfun = sum,nlevels = NULL)
+
+``` 
+orderfact(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,  
+          ordervar = "c..nt", orderval = NA, orderfun = sum,nlevels = NULL)
+``` 
 
 #### Arguments
 
 `dataf`  The dataframe  
 `nomfact`  The factor's name  
-`orderfreq = TRUE`      should the factor's levels be reordered  
+`orderfreq = TRUE`      should the factor's levels be reordered ?  
 `orderdesc = TRUE`      in descending order if TRUE  
 `ordervar = "c..nt"`    the ordering variable (if "c..nt", the number of rows)  
 `orderval = NA`         According to the frequency of a value ? (if supplied)  
@@ -108,14 +108,17 @@ be treated with as.data.frame() before calling the function.
 
 
 
-##  Main functions
+# Functions Description: Main functions
 
 
 ### cat1 : Analyze one categorical variable (factor)  
 
 #### Usage  
-        cat1(dataf, nomfact, useNA = "no", orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
-                orderval = NA, orderfun = sum, rfreq = TRUE, digits = 2, cfill = "steelblue")
+``` 
+cat1(dataf, nomfact, useNA = "no", orderfreq = TRUE, orderdesc = TRUE, 
+     ordervar = "c..nt", orderval = NA, orderfun = sum, 
+     rfreq = TRUE, digits = 2, cfill = "steelblue")
+``` 
 
 #### Arguments  
 `dataf`  The dataframe   
@@ -133,88 +136,94 @@ be treated with as.data.frame() before calling the function.
 #### Value
 named list:  
 
-*   name = factor name  
-*   levels = factor levels   
-*   table = frequency table. 
-*   num = number of observations  
-*   uchisq = Chi-square test for GoF with the uniform distribution (done with chisq.test)  
-*   plot =  ggplot2 bar chart  
+*   name = factor name
+*   levels = factor levels
+*   table = frequency table.
+*   num = number of observations
+*   uchisq = Chi-square test for GoF with the uniform distribution (done with chisq.test)
+*   plot =  ggplot2 bar chart
 
 #### Details    
 
 #### Example  
 
-        mc <- cat1(as.data.frame(mpg), "class")
-        
-        # with plot value labels and cosmetic changes
-        mc$plot +
-                geom_text(data=mc$table , aes( x=class, y = 100 * rfreq - 1.5, 
-                                                label = ifelse(index <= 6, perclabs, ""))) +
-                theme(axis.text.x = element_text(angle=45, hjust=1)) +
-                labs(title = "Class",
-                        x = "",
-                        y = "percentage")
+```
+# example 1
+mc <- cat1(as.data.frame(mpg), "class")
+
+# with plot value labels and cosmetic changes
+mc$plot +
+    geom_text(data=mc$table, aes(x=class, y = 100 * rfreq - 1.5, 
+                                 label = ifelse(index <= 6, perclabs, "")) + 
+    theme(axis.text.x = element_text(angle=45, hjust=1)) +
+    labs(title = "Class",
+         x = "",
+         y = "percentage")
                         
         
-        # 2nd example, with ordering by the frequency of a value in another variable
-        mc <- cat1(as.data.frame(mpg), "class", ordervar = "drv", orderval = "4", orderdesc = FALSE)
-        mc$plot +
-                geom_text(data=mc$table , aes( x=class, y = 100 * rfreq - 1.5, 
-                                                label=ifelse(rfreq >= 0.19, perclabs, ""))) +
-                theme(axis.text.x = element_text(angle=45, hjust=1)) +
-                labs(title = "Class", 
-                        x = "",
-                        y = "percentage")
+# 2nd example, with ordering by the frequency of a value in another variable
+mc <- cat1(as.data.frame(mpg), "class", 
+           ordervar = "drv", orderval = "4", orderdesc = FALSE)
+mc$plot +
+    geom_text(data=mc$table, aes(x=class, y = 100 * rfreq - 1.5, 
+                                 label=ifelse(rfreq >= 0.19, perclabs, ""))) +
+    theme(axis.text.x = element_text(angle=45, hjust=1)) +
+    labs(title = "Class", 
+         x = "",
+         y = "percentage")
         
-        # checking if differences may be significant
-        mc$uchisq$p.value
-
+# checking if differences may be significant
+mc$uchisq$p.value
+```
  
----
+
 ### num1d : Analyze one numerical variable (discrete)
 
 #### Usage  
-        num1d(dataf, nomvar, digits = 2, sumdigits = 2,
-                  useNA ="no", rfreq = TRUE, 
-                  width = .5, cfill = "steelblue")
+``` 
+num1d(dataf, nomvar, digits = 2, sumdigits = 2,
+      useNA ="no", rfreq = TRUE, 
+      width = .5, cfill = "steelblue")
+``` 
 
 #### Arguments  
 
-`dataf`
-`nomvar`        name of the numeric variable
-`digits` = 2    number of digits for relative frequency
-`sumdigits` = 2 number of digits for the summaries
-`useNA` ="no",  Show missing values
-`rfreq` = TRUE  Use relative frequency Y-axis
-`width` = .5    Width of bars
-`cfill` = "steelblue"   default fill colour
+`dataf`  
+`nomvar`        name of the numeric variable  
+`digits` = 2    number of digits for relative frequency  
+`sumdigits` = 2 number of digits for the summaries  
+`useNA` ="no",  Show missing values  
+`rfreq` = TRUE  Use relative frequency Y-axis  
+`width` = .5    Width of bars  
+`cfill` = "steelblue"   default fill colour  
 
 #### Value 
 
-A names list:  
+A named list:
 
-*  name = name of variable  
-*  summaries = number of cases (Num), mean (Mean), std dev (St.dev), Min., 1st Qu.,Median,3rd Qu., Max., NA's 
-*  table = Frequency table.  Table columns:
-        *  variable  
-        *  num = frequency  
-        *  rfreq = relative frequency  
-        *  perclabs  = percentage labels  
-        *  numlabs = frequency labels  
-        *  index = row index  
-*  num = number of cases   
+* name = name of variable
+* summaries = named vector [number of cases (Num), mean (Mean), std dev (St.dev), 
+                        Min., 1st Qu.,Median,3rd Qu., Max., NA's]
+*  table = Frequency table.  
+        Table columns:  
+    * variable name
+    * num = frequency
+    * rfreq = relative frequency
+    * perclabs  = percentage labels
+    * numlabs = frequency labels
+    * index = row index
+*  num = number of cases
 *  uchisq = chisquare test for GoF with a uniform distribution
 *  plot = ggplot2 bar chart
 
 #### Details  
 
-#### Example  
-
-        # test with mpg
-        res <- num1d(as.data.frame(mpg), "cyl")
-        res$plot + xlab("Cylinders") + ylab("Percentage")
-
-
+#### Example
+``` 
+# test with mpg
+cyl <- num1d(as.data.frame(mpg), "cyl")
+cyl$plot + xlab("Cylinders") + ylab("Percentage")
+``` 
 
 
 ### cat2 : Analyze two categorical variable (factors) together
@@ -246,7 +255,7 @@ cat2(dataf, nomfact1, nomfact2,  useNA = "no",
 `ordervar2` = "c..nt"  
 `orderval2` = NA   
 `orderfun2` = sum  
-`nlevel2` =NULL  
+`nlevel2` = NULL  
 `rfreq` = TRUE unused but should mean relative frequency (vs absolute, ie position = "fill" or "stack")  
 `digits` = 2  
 `cfill` = "steelblue" (unused)  
