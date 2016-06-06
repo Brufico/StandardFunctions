@@ -103,22 +103,7 @@ sumvector <- function (var, dnames = sfdefault("namesum"), reportNA = sfdefault(
 }
 
 
-# table (horizontal, dataframe) of summaries for 1 variable
 
-# sumtable <- function (var) {
-#         sv <- sumvector(var)
-#         st <- matrix(sv,nrow = 1)
-#         st <- as.data.frame(st)
-#         colnames(st) <- namesum
-#         st
-# }
-
-# _______ inutile
-# sumtable <- function (var) {
-#         t(sumvector(var))
-# }
-# #test
-#
 # summary(mpg$hwy)
 #
 # sumvector(dtf$cval1)
@@ -176,7 +161,7 @@ condsummaries <- function (dataf, vname, fname) {
 #tests
 # condsummaries(dtf, "cval1", "nam1")
 #
-# condsummaries(mpg,"hwy","class")
+condsummaries(mpg,"hwy","class")
 # condsummaries(mpg,"hwy","manufacturer") # ok
 
 # diamonds

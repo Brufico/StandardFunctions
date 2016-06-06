@@ -8,10 +8,17 @@ library(dplyr)
 
 #library(reshape2)
 
+
+
+# ***************** ======================================================
+# helper functions =======================================================
+# *****************=======================================================
+
+
 # constants and Default options settings  ===============================
 
 sfinitdefaults <- function () {
-        # structure definition
+        # structure definition, with some constants already set up
         defaultvalue <- list( #namesum
                 namesumeng = c("n", "Mean", "St.dev",
                                "Min.", "1st Qu.","Median", "3rd Qu.",  "Max.",
@@ -38,7 +45,7 @@ sfinitdefaults <- function () {
 }
 
 
-# set up access function and some defaults
+# set up access function and some defaults ---------------------------------------
 sfdefault <- sfinitdefaults()
 
 sfdefault("language","french")
@@ -48,15 +55,11 @@ if(sfdefault("language") == "french") {
         sfdefault("namesum", sfdefault("namesumeng"))
 }
 sfdefault("reportNA", FALSE) # report number of NA's in a variable?
-
-# must do the same for digits !
-
+sfdefault("digits", 2)
 
 
 
-# ***************** ======================================================
-# helper functions =======================================================
-# *****************=======================================================
+
 
 
 # simple and multiple summary tables # =======================================
@@ -197,10 +200,7 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
 }
 
 # ======================================================================================
-# Statistical Testing functions GOF chi-square test for a uniform distribution
-# uniform.chisq.test <- function(ofreq) { chisq.test(ofreq, p = rep(1,
-# length(ofreq)), rescale.p = TRUE) } # semble inutile
-
+# Statistical Testing functions
 
 # identify a  warning
 is.warning <- function(x) {"warning" %in% class(x)}
@@ -210,7 +210,8 @@ is.warning <- function(x) {"warning" %in% class(x)}
 # (conditions approximation du chi2 non satisfaites), alors, calculer la
 # p-valeur par simulation
 # si keep-all, retourne les 2 tests (chi2 et
-# simulation, une valeur logique indiquant le warning, et le warning lui-même). Le test préférée est alors listé
+# simulation, une valeur logique indiquant le warning, et le warning lui-même).
+# Le test préférée est alors listé comme test1
 
 try.chisq.test <- function(..., keep.all = TRUE) {
         ww <- tryCatch(chisq.test(...),

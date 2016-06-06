@@ -1,0 +1,62 @@
+---
+title: "Publication tries"
+author:
+- affiliation: Ipag
+  name: Bruno Fischer Colonimos
+date: "6 juin 2016"
+output: word_document
+abstract: This documents aims to test the interaction of summary vectors and tables,
+  and Kable
+---
+
+```{r setup, include=FALSE, warning=FALSE}
+library(knitr)
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r load, cache=TRUE, echo = FALSE, results='hide'}
+"change2"
+source("tries.R")
+
+```
+
+```{r lib, warning = FALSE, cache=FALSE, results='hide'}
+library(ggplot2)
+mpg
+```
+
+# Kable Table one
+
+Okay, first try.^[An inline note: ds  msdfmlmsd mlsd sdmlsd sdf sdf!!!]
+
+```{r singlevar}
+data("cars")
+scarspeed <- sumvector(cars$speed)
+stcarspeed <- sumtable(cars$speed)
+kable(scarspeed, caption = "sumvector")
+kable(t(scarspeed), caption = "transposed")
+kable(stcarspeed, caption = "sumtable")
+```
+
+
+
+# Kable Table two
+
+```{r multiplevar}
+data(mpg)
+cb2 <- cbsummaries(mpg, c("hwy", "cty"))
+kable(cb2, caption = "multiple", format.args = list(digits=2, nsmall=0, drop0trailing = TRUE))
+
+kable(t(cb2), caption = "multiple")
+
+```
+
+And now with the conditional summaries
+
+```{r conditional}
+cd <- condsummaries(mpg,"hwy","manufacturer")
+kable(cd, caption = "multiple", format.args = list(digits=2, nsmall=0, drop0trailing = TRUE))
+kable(t(cd), caption = "Highway mpg", format.args = list(digits=3, nsmall=0, drop0trailing = TRUE))
+
+```

@@ -59,15 +59,26 @@ make_testdata <- function(tbsize = 40, seed = 98756, naratio = .5) {
 
 ## actually make data ---------------------------------------------------
 dtf <- make_testdata()
-# dput(make_testdata(tbsize = 10, naratio = .5))
+
 
 
 
 # ***************** ======================================================
 # helper functions =======================================================
+# ========================================================================
+
+# TEST sfdefault --------------------------------------------------
+# sfdefault()
+# sfdefault("language")
+# sfdefault("blabla", 6)
+# sfdefault("blabla")
+#
+# sfdefault("namesumfrench")
+# sfdefault("namesum", default("namesumfrench"))
+# sfdefault("namesum")
 
 
-# TEST condfreqtable()
+# TEST condfreqtable() -----------------------------------------------
 
 # aa <- condfreqtable(dtf, "nam1", "nam2")
 # condfreqtable(dtf, "nam1", "nam2")
@@ -78,31 +89,31 @@ dtf <- make_testdata()
 # condfreqtable(mpg, "class", "drv") # ==> Problem within prop.table(), only works with dataframes
 # condfreqtable(as.data.frame(mpg), "class", "drv")
 
-Another way: reshape in a crosstab
+# Another way: reshape in a crosstab
 # dcast(aa, formula = nam1 ~ nam2 , value.var = "perc", drop=FALSE, fill = 0)
 
 
-# my version of reorder (inutile maintenant que j'ai la solution)
-summaryunique <- function(df, nomfact, nomvar, fun = mean, decreasing=FALSE, outputdf = FALSE) {
-        # print("summaryunique") ; print("df=") ;print(df); print(nomfact); print(nomvar)
-        x <- df[, nomfact]
-        u <- unique(x[!is.na(x)])
-        values <- split(df, df[ , nomfact]) %>%
-                lapply(function(d) fun(d[, nomvar], na.rm=TRUE) ) %>%
-                unsplit(u)
-        if (outputdf) {
-                data.frame( level = u, values)
-        } else {
-                u[order(values, decreasing = decreasing)]
-        }
-}
-
-
-
-reorderlevels <- function(df, nomfact, nomvar,fun = mean, decreasing = FALSE) {
-        lv <- summaryunique(df, nomfact, nomvar, fun=fun, decreasing=decreasing)
-        factor(df[, nomfact], levels = lv)
-}
+# Note: my version of reorder (inutile maintenant que j'ai la solution)
+# summaryunique <- function(df, nomfact, nomvar, fun = mean, decreasing=FALSE, outputdf = FALSE) {
+#         # print("summaryunique") ; print("df=") ;print(df); print(nomfact); print(nomvar)
+#         x <- df[, nomfact]
+#         u <- unique(x[!is.na(x)])
+#         values <- split(df, df[ , nomfact]) %>%
+#                 lapply(function(d) fun(d[, nomvar], na.rm=TRUE) ) %>%
+#                 unsplit(u)
+#         if (outputdf) {
+#                 data.frame( level = u, values)
+#         } else {
+#                 u[order(values, decreasing = decreasing)]
+#         }
+# }
+#
+#
+#
+# reorderlevels <- function(df, nomfact, nomvar,fun = mean, decreasing = FALSE) {
+#         lv <- summaryunique(df, nomfact, nomvar, fun=fun, decreasing=decreasing)
+#         factor(df[, nomfact], levels = lv)
+# }
 
 
 # test reorderlevels
