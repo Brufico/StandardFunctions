@@ -637,7 +637,7 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
 # }
 
 
-# caté New def ==================================================================
+# cat2 New def ==================================================================
 
 
 cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
@@ -721,4 +721,7 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
         )
 }
 
+# cat1num1c ==================================================================
+#
+# fonction de graphique
 

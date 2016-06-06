@@ -327,12 +327,12 @@ ggplot(mpg,aes(cyl , hwy, color=factor(cyl))) +
 # Thus:
 cbydboxjit <- function(dataf, vard, varc, useNA = "no",
                        labellayer = "", labelall = "All values", labelgroups = "by goup") {
-        dataf <- as.data.frame(dataf) # same problem with tbl_df
+        # dataf <- as.data.frame(dataf) # same problem with tbl_df
         if (useNA == "no") {
-                dataf <- dataf[!is.na(dataf[ , vard]) & !is.na(dataf[ , varc]), ]
+                dataf <- dataf[!is.na(dataf[[vard]]) & !is.na(dataf[[varc]]), ]
         }
-        dataf$fact_vard<- factor(dataf[, vard])
-        ggplot(dataf,aes_(as.name(vard) , as.name(varc), color=quote(fact_vard))) +
+        dataf$fact_vard. <- factor(dataf[[vard]])
+        ggplot(dataf,aes_(as.name(vard) , as.name(varc), color=quote(fact_vard.))) +
                 geom_boxplot(aes(group = 1, fill =  labelall), outlier.colour = "gray") +
                 geom_boxplot(aes(fill = labelgroups), varwidth = TRUE, outlier.colour = "gray") +
                 geom_jitter( width =.5, alpha=.5) +
@@ -340,16 +340,17 @@ cbydboxjit <- function(dataf, vard, varc, useNA = "no",
 }
 
 # usage
-# cbydboxjit(mpg, vard = "cyl", varc = "hwy")
-#
-# cbydboxjit(mpg, vard = "cyl", varc = "hwy", labellayer = "Legend", labelall = "together", labelgroups = "by cylinders") +
-#         scale_color_brewer(palette = "Set1", guide = FALSE) +
-#         labs(title = "Highway Miles/gallon",x = "Cylinders", y= "miles/gallon")
-#
-# cbydboxjit(dtf, vard = "dval1", varc = "dval2", labelall = "Together", labelgroups= "by Dval1")+
-#         scale_color_brewer(palette = "Set1", guide = FALSE) +
-#         scale_fill_brewer(palette = "Set3")
-#
+cbydboxjit(mpg, vard = "cyl", varc = "hwy")
+
+cbydboxjit(mpg, vard = "cyl", varc = "hwy", labellayer = "Legend", labelall = "together", labelgroups = "by cylinders") +
+        scale_color_brewer(palette = "Set1", guide = FALSE) +
+        labs(title = "Highway Miles/gallon",x = "Cylinders", y= "miles/gallon") +
+        scale_fill_brewer(palette = "Set2")
+
+cbydboxjit(dtf, vard = "dval1", varc = "dval2", labelall = "Together", labelgroups= "by Dval1")+
+        scale_color_brewer(palette = "Set1", guide = FALSE) +
+        scale_fill_brewer(palette = "Set3")
+
 
 
 
@@ -392,7 +393,7 @@ cbyfboxjit <- function(dataf, varf, varc, useNA = "no",
         # dataf <- as.data.frame(dataf) # same problem with tbl_df
         # dataf$fact_vard<- factor(dataf[, vard])
         if (useNA == "no") {
-                dataf <- dataf[!is.na(dataf[ , varf]) & !is.na(dataf[ , varc]), ]
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
                 }
         ggplot(dataf,aes_(as.name(varf) , as.name(varc), color=as.name(varf))) +
                 geom_boxplot(aes(group = 1, fill =  labelall), outlier.colour = "gray") +
@@ -402,19 +403,63 @@ cbyfboxjit <- function(dataf, varf, varc, useNA = "no",
 }
 
 # # usage
-# cbyfboxjit(mpg, varf = "class", varc = "hwy")
-#
-# cbyfboxjit(mpg, varf = "class", varc = "hwy", labellayer = "Legend", labelall = "together", labelgroups = "by class") +
-#         scale_color_brewer(palette = "Set1", guide = FALSE) +
-#         scale_fill_brewer(palette = "Set3") +
-#         labs(title = "Highway Miles/gallon",x = "Vehicle class", y= "miles/gallon")
-#
-#
-# cbyfboxjit(dtf, varf = "nam1", varc = "cval1")
-#
+cbyfboxjit(mpg, varf = "class", varc = "hwy")
+
+cbyfboxjit(mpg, varf = "class", varc = "hwy", labellayer = "Legend", labelall = "together", labelgroups = "by class") +
+        scale_color_brewer(palette = "Set1", guide = FALSE) +
+        scale_fill_brewer(palette = "Set3") +
+        labs(title = "Highway Miles/gallon",x = "Vehicle class", y= "miles/gallon")
+
+
+cbyfboxjit(dtf, varf = "nam1", varc = "cval1")
+
 
 
 
 # ==================================================================================================================
 
+cbyfdensity <- function(dataf, varf, varc, useNA = "no") {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+        ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf))) +
+                geom_density(alpha = 0.3)
+}
 
+#use
+cbyfdensity(mpg, "drv", "hwy")
+cbyfdensity(mpg, "cyl", "hwy")
+cbyfdensity(mpg, "cyl", "cty")
+
+windows()
+cbyfdensity(mpg, "drv", "hwy") +facet_grid(.~class)
+dev.off()
+
+
+
+
+
+
+cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, ...) {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+        s <- condsummaries(dataf,fname = varf, varc=varc)
+        p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
+                } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
+        p <- p+ geom_histogram(..., position = "dodge")
+        # return named list
+        list(name = c(varc , varf)
+             summaries = s,
+             table = NULL, #tb,
+             num = NA, #num
+             uchisq = NULL, # uchisq
+             plot = p)
+}
+
+p <- cbyfhistogram(mpg, "drv", "hwy", bins=10)
+
+m <- ggplot_build(p)
+m
