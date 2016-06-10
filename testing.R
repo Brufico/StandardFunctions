@@ -243,37 +243,65 @@ res$plot + xlab("Cylinders") + ylab("Percentage")
 
 
 # # tests for num1c ===================================================
+# tests for mkclabs
+mkclabs( c(1,2,4,6))
 
+# test for nonavect
+nonavect(c(2,4, 6, NA, 10))
+
+
+# tests for num1c
 num1c(mpg,"hwy")
 num1c(mpg,"hwy", plot_density = TRUE)
-num1c(mpg,"hwy", bins = nclass.FD(mpg$hwy))
-num1c(mpg,"hwy", breaks = seq(from=10,to=42, by=4))
-num1c(mpg,"hwy", breaks = seq(from=11,to=44, by=3))
-num1c(mpg,"hwy", breaks = seq(from=11,to=44, by=3), plot_density = TRUE)
+num1c(mpg,"hwy", bins = "nclass.FD")
+num1c(mpg,"hwy", binwidth=3, plot_density = TRUE)
+num1c(mpg,"hwy", breaks = seq(from=10,to=46, by=4), plot_density = TRUE)
+num1c(mpg,"hwy", breaks = seq(from=11,to=46, by=3), plot_density = TRUE)
+num1c(mpg,"hwy", breaks = seq(from=11,to=46, by=3))
+
+num1c(mpg,"hwy", breaks = c(seq(from=11,to=38, by=3), 44), plot_density = TRUE)
 num1c(mpg,"hwy", usedensity = TRUE, breaks = seq(from=10,to = 45, by=5))
 num1c(mpg,"hwy", plot_density = TRUE, breaks = seq(from=10,to=46, by=4))
-
 
 
 # stem(mpg$cty)
 #
 num1c(mpg,"cty", plot_density = TRUE)
-num1c(mpg,"cty", bins = nclass.FD(mpg$hwy), plot_density = TRUE )
-num1c(mpg,"cty", breaks = seq(from=6,to=36, by=3), plot_density = TRUE)
-ctypt <- num1c(mpg,"cty", breaks = c(6,9,12,15,18,21,24,36), plot_density = TRUE)
+num1c(mpg,"cty", bins = "nclass.FD", plot_density = TRUE )
+num1c(mpg,"cty", binwidth = 2, plot_density = TRUE )
+num1c(mpg,"cty", breaks = seq(from=8,to=36, by=2), plot_density = TRUE)
 
-ctypt$plot + geom_text(data=ctypt$table, aes(x, y/2, label=perclabs)) +
+num1c(mpg,"cty", breaks = seq(from=9,to=35, by=2), plot_density = TRUE)
+
+num1c(mpg,"cty", bins = "nclass.scott", plot_density = TRUE )
+num1c(mpg,"cty", breaks = seq(from=7,to=37, by= 3), plot_density = TRUE)
+num1c(mpg,"cty", breaks = seq(from=8,to=38, by= 3), plot_density = TRUE)
+
+
+ctypt <- num1c(mpg,"cty", breaks = c(seq(from=8,to=28, by=2),36), plot_density = TRUE)
+
+ctypt$plot + geom_text(data=ctypt$table$ggtable, aes(x, y/2, label=perclabs)) +
         labs(title="City mpg distribution")
 
 
-ctypt$table$ndensity  /ctypt$table$rfreq
+ctypt$table$ggtable$ndensity  /ctypt$table$ggtable$rfreq
 
 
 
+num1c(dtf,"cval1", bins = "nclass.FD")
+num1c(dtf,"cval1", binwidth = 1)
+num1c(dtf,"cval1", breaks=seq(2, 7, by=1), plot_density = TRUE)
+num1c(dtf,"cval1", breaks=seq(1.5, 7.5, by=1), plot_density = TRUE)
+num1c(dtf,"cval1", breaks=seq(2, 7, by=.5), plot_density = TRUE)
 
+num1c(dtf,"cval2", bins = "nclass.FD", plot_density = TRUE)
+num1c(dtf,"cval2", binwidth = 3, plot_density = TRUE)
 
+num1c(dtf,"cval2", breaks=seq(3, 18, by=3), plot_density = TRUE)
+c2r <- num1c(dtf,"cval2", breaks=seq(1.5, 19.5, by=3), plot_density = TRUE)
 
-
+print(c2r$plot)
+print(c2r$tables$ptable[c(1,3, 4)])
 
 # cat2 ==================================================================
 

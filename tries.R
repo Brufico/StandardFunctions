@@ -231,39 +231,39 @@ nclass.scott(mpg$hwy)
 # stem(mpg$hwy)
 
 # fonction
-num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
-                 fillhist = "steelblue", color_density = "red", digits = 2, # à modifier
-                 bins = NULL, ...) {  # ... = addtl arguments for geom_hist
-        if (plot_density) {usedensity <- TRUE} # plot_density overrides usedensity
-        p <- ggplot(mpg, aes_(as.name(nomvar))) +
-                if (usedensity) {geom_histogram(aes(y=..density..),bins = bins, fill = fillhist,...)
-                } else {geom_histogram(bins = bins, fill = fillhist, ...)}
-        if (plot_density) {p <- p + geom_density(color=color_density) }
-         # make summaries vector
-        s = sumvector(dataf[[nomvar]])
-        num = s["num"] # number of cases
-
-        # get the frequency table
-        tb <- ggplot_build(p)$data[[1]][ , 1:8]
-        # add  columns to it
-        tb$rfreq <- tb$count/num
-        tb$numlabs <-  paste0("n=", tb$count)
-        tb$perclabs <- paste0(100* round(tb$rfreq, digits), "%")
-        tb$index <- ave(1:nrow(tb),  FUN = function(x) 1:length(x)) # rank
-
-        # Uniform Chi2 test
-        uchisq <- try.chisq.test(tb$count)
-        if (length(unique(round(tb$xmax-tb$xmin,digits))) >= 2) {
-                        warning(paste0("Uchisq ", nomvar, " with different class widths!!", call. = TRUE)) }
-
-        # return named list
-        list(name = nomvar,
-             summaries = s,
-             table = tb,
-             num = num,
-             uchisq = uchisq,
-             plot = p)
-}
+# num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
+#                  fillhist = "steelblue", color_density = "red", digits = 2, # à modifier
+#                  bins = NULL, ...) {  # ... = addtl arguments for geom_hist
+#         if (plot_density) {usedensity <- TRUE} # plot_density overrides usedensity
+#         p <- ggplot(mpg, aes_(as.name(nomvar))) +
+#                 if (usedensity) {geom_histogram(aes(y=..density..),bins = bins, fill = fillhist,...)
+#                 } else {geom_histogram(bins = bins, fill = fillhist, ...)}
+#         if (plot_density) {p <- p + geom_density(color=color_density) }
+#          # make summaries vector
+#         s = sumvector(dataf[[nomvar]])
+#         num = s["n"] # number of cases
+#
+#         # get the frequency table
+#         tb <- ggplot_build(p)$data[[1]][ , 1:8]
+#         # add  columns to it
+#         tb$rfreq <- tb$count/num
+#         tb$numlabs <-  paste0("n=", tb$count)
+#         tb$perclabs <- paste0(100* round(tb$rfreq, digits), "%")
+#         tb$index <- ave(1:nrow(tb),  FUN = function(x) 1:length(x)) # rank
+#
+#         # Uniform Chi2 test
+#         uchisq <- try.chisq.test(tb$count)
+#         if (length(unique(round(tb$xmax-tb$xmin,digits))) >= 2) {
+#                         warning(paste0("Uchisq ", nomvar, " with different class widths!!", call. = TRUE)) }
+#
+#         # return named list
+#         list(name = nomvar,
+#              summaries = s,
+#              table = tb,
+#              num = num,
+#              uchisq = uchisq,
+#              plot = p)
+# }
 
 
 # return examples from num1d, modified
