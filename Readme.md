@@ -3,12 +3,15 @@ title: "Standard Functions for Basic Statistical Analysis"
 author: "Bruno Fischer Colonimos"
 date: "4 juin 2016"
 output:
+  pdf_document: 
+    toc: yes
   html_document:
     number_sections: yes
     theme: readable
   word_document: default
 ---
 
+-------------------------------------------------------------
 
 Overview
 =======================
@@ -16,13 +19,13 @@ Overview
 Motivation
 -----------------------
 
-Here is an attempt to build a set of very basic tools for statistical analysis.
-For each situation, ie each combination of types of thr variables being analyzed
-, one function will provide the most frequently useful analysis elements.
+Here is an attempt to build a set of very basic tools for (exploratory) statistical analysis.
+For each situation, (ie each combination of types of the variables being analyzed)
+, one would call a standard function, which will provide a set of most frequently useful analysis elements.
 
 Each main function should return a list of the following elements:
 
-* The name(s) of the variable(s) analyzed 
+* The name(s) of the variable(s) analyzed (vector)
 * The number of (valid) cases 
 * some summaries 
 * one or more tables 
@@ -33,31 +36,73 @@ Each main function should return a list of the following elements:
 The main functions
 -----------------------
 
-### One variable * cat1 :  1 categorical variable (factor) 
+### One variable 
 
-* num1c :  1 (continuous) numeric variable 
-* num1d :  1 (discrete) numeric variable
+cat1 
+~ 1 categorical variable (factor)
+
+num1c
+~ 1 (continuous) numeric variable
+
+num1d
+~ 1 (discrete) numeric variable
+
 
 ### Two variables
 
-*  cat2 :  2 factors 
-*  cat1num1d :  1 categorical variable (factor) + 1 (discrete) numeric variable 
-*  cat1num1d :  1 categorical variable (factor) + 1 (continuous) numeric variable *  num2 :  2 numeric variables
+cat2 :
+~ 2 factors 
+
+cat1num1d
+~ 1 categorical variable (factor) + 1 (discrete) numeric variable 
+
+cat1num1c
+~ 1 categorical variable (factor) + 1 (continuous) numeric variable
+
+num2
+~ 2 numeric variables
 
 
+-------------------------------------------------------------
 
-
-Functions Desctiption: Helper functions 
+Code Description: Constants and settings 
 =======================================
 
-Constants and settings 
-----------------------
 
-### sfdefaults : setting global constants and default values
+### Function sfinitdefaults : Initialize global constants and default values
 
 #### Usage {-}
 
-``` sfdefaults(name) sfdefaults(name, value) ```
+``` 
+sfdefault <- sfinitdefaults() 
+```
+
+#### Arguments {-}
+
+None
+
+#### Value {-}
+
+The function `sfdefault`
+
+#### Details {-}
+
+`sfinitdefaults(name)`   constructs the initial list of
+defaults and returns the function to access and modify it
+
+#### Example {-} 
+
+```
+```
+
+### Function sfdefaults() : set global constants and default values
+
+#### Usage {-}
+
+``` 
+sfdefaults(name) 
+sfdefaults(name, value) 
+```
 
 #### Arguments {-}
 
@@ -90,10 +135,15 @@ if(sfdefault("language") == "french") {
 ```
 
 
+-------------------------------------------------------------
+
+Functions Description: Helper functions 
+=======================================
+
 Simple and multiple summary tables
 ----------------------------------
 
-### sumvector : generate a named vector of summaries
+### Function sumvector(): generate a named vector of summaries
 
 #### Usage {-}
 
@@ -135,7 +185,7 @@ sumvector(mpg[["hwy"]])
 
 ```
 
-### cbsummaries : combined summaries tables for different variables in a dataframe, for all individuals
+### Function cbsummaries() : combined summaries tables for different variables in a dataframe, for all individuals
 
 #### Usage {-}
 
@@ -162,7 +212,7 @@ cbsummaries(mpg, c("hwy", "cty"))
 ```
 
 
-### condsummaries : combined summaries for one variable, conditional to the values of a factor
+### Function condsummaries() : combined summaries for one variable, conditional to the values of a factor
 
 #### Usage {-}
 
@@ -205,7 +255,7 @@ condsummaries(mpg,"hwy","class")
 Data manipulation : Tables, ordering, error/warning testing
 -----------------------------------------------------------
 
-### condfreqtable: Make a conditional frequency table for 2 factors
+### Function condfreqtable(): Make a conditional frequency table for 2 factors
 
 #### Usage {-} 
 
@@ -213,7 +263,7 @@ Data manipulation : Tables, ordering, error/warning testing
 condfreqtable(dataf, nomfact1, nomfact2, useNA = "no") 
 ```
 
-#### Formal arguments {-} 
+#### Arguments {-} 
 
 `dataf`         the dataframe  
 `nomfact1`      first factor name (string)  
@@ -232,12 +282,12 @@ Dataframe columns :
 
 #### Details{-} 
 
-currently, Only works correctly with data.frames, not tbl_df. tbl_df's
-should be treated with as.data.frame() before calling the function. 
-working on repairing this
+~~currently, Only works correctly with data.frames, not tbl_df. 
+tbl_df's should be treated with as.data.frame() before calling the function.
+working on repairing this~~. Corrected. Should work ok.
 
 
-### orderfact : reordering the levels of one factor
+### Function orderfact() : reorder the levels of a factor
 
 #### Usage {-}
 
@@ -250,7 +300,7 @@ orderfact(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
 
 `dataf` ==> The dataframe  
 `nomfact` ==>   The factor's name  
-`orderfreq` ==> should the factor's levels be reordered accoring to frequency or another var?  
+`orderfreq` ==> should the factor's levels be reordered according to frequency or another var?  
 `orderdesc` ==>  in descending order if TRUE  
 `ordervar` ==> the ordering variable (if not supplied or "c..nt", the number of rows)  
 `orderval` ==> According to the frequency of a certain value ? (if supplied)  
@@ -259,12 +309,17 @@ orderfact(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
 
 #### Value {-} 
 
-The factor, with reordered levels
+The factor, with reordered levels, according to either:
+
+* the frequency of the levels
+* a function of the values of another (numeric) variable
+* the relative frequency of a value of another variable, within all the rows of a level
 
 #### Details  
-Do not reorder with this function an ordered factor ????
-Currently, only works correctly with data.frames, not tbl_df. 
-tbl_df's shouldbe treated with as.data.frame() before calling the function.
+Do not reorder with this function an ordered factor ?!!  
+~~Currently, only works correctly with data.frames, not tbl_df. 
+tbl_df's shouldbe treated with as.data.frame() before calling the function.~~ 
+Not true anymore. Should work ok.
 
 #### Example {-}
 
@@ -273,8 +328,10 @@ missing example code
 ```
 
 
+Shortcut & utility functions
+----------------------------
 
-### is.warning() : Identify a warning
+### Utility function: is.warning() : Is this a warning ?
 
 #### Usage {-}
 
@@ -284,11 +341,11 @@ is.warning(x)
 
 #### Arguments {-}
 
-x ==> the element to be tested
+x ==> the value to be tested
 
 #### Value {-}
 
-TRUE if x is a warning
+TRUE if x is a warning else FALSE
 
 #### Details {-}
 
@@ -304,12 +361,41 @@ is.warning <- function(x) {"warning" %in% class(x)}
 None
 ```
 
+### utility function: nonavect() : removes NA's from a vector
+
+#### Usage {-}
+
+```
+nonavect(x)
+```
+
+#### Arguments {-}
+
+x ==> the vector
+
+#### Value {-}
+
+the vector with NA's removed
+
+#### Details {-}
+
+definition: 
+
+```
+nonavect <- function(vect) {vect[which(!is.na(vect))]}
+```
+
+#### Example {-}
+
+```
+None
+```
 
 Statistical functions
 ---------------------
 
 
-### try.chisq.test() : chisquare test with warning detection
+### Function try.chisq.test() : chisquare test with warning detection
 
 #### Usage {-}
 
@@ -347,20 +433,24 @@ else (If there is a warning), the reverse:
 * test2 = classical chi2 test
 
 then, if keep-all = true, everything is returned, if not, only test1 is returned  
-In all cases, test1 is normally the most valid test.
+In all cases, test1 is normally the most valid test.  
 Applies to all the chisquare tests
 
 
 #### Example {-}
 
 ```
+No example yet
 ```
 
+
+
+-------------------------------------------------------------
 
 Functions Description: Main functions
 =====================================
 
-### cat1 : Analyze one categorical variable (factor)
+### Function cat1() : Analyze one categorical variable (factor)
 
 #### Usage {-} 
 
@@ -567,7 +657,7 @@ print(try(log("a"), TRUE)) # dummy code
 ```
 
 
-### Namefun : Template ---
+### Function Namefun : Template ---
 
 #### Usage {-}
 

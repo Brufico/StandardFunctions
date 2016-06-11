@@ -19,43 +19,43 @@ library(dplyr)
 # ===============================================================================
 
 # Constantes et options : encapsulation
-
-initdefaults <- function () {
-        # structure definition
-        defaultvalue <- list( #namesum
-                namesumeng = c("n", "Mean", "St.dev",
-                               "Min.", "1st Qu.","Median", "3rd Qu.",  "Max.",
-                               " NA's"),
-                namesumfrench  = c("n", "Moyenne", "Ecart-type",
-                                   "Min.", "Q1","Médiane", "Q3",  "Max.",
-                                   " NA's"),
-                namesum ="",
-                language = "",
-                filldefault = "steelblue")
-        # access function
-        function(name=NULL, value = NULL){
-                if(is.null(name)) {
-                        warning("initdefaults : You must supply a name",
-                                immediate. = TRUE, call. = TRUE)
-                        NULL
-                } else {
-                        if (!is.null(value)) {
-                                defaultvalue[[name]] <<- value
-                                defaultvalue[[name]]
-                        } else {defaultvalue[[name]]}
-                }
-        }
-}
-
-
-# set up access function and some defaults
-sfdefault <- initdefaults()
-sfdefault("language","french")
-if(sfdefault("language") == "french") {
-        sfdefault("namesum", sfdefault("namesumfrench"))
-}
-sfdefault("reportNA", FALSE)
-
+#
+# initdefaults <- function () {
+#         # structure definition
+#         defaultvalue <- list( #namesum
+#                 namesumeng = c("n", "Mean", "St.dev",
+#                                "Min.", "1st Qu.","Median", "3rd Qu.",  "Max.",
+#                                " NA's"),
+#                 namesumfrench  = c("n", "Moyenne", "Ecart-type",
+#                                    "Min.", "Q1","Médiane", "Q3",  "Max.",
+#                                    " NA's"),
+#                 namesum ="",
+#                 language = "",
+#                 filldefault = "steelblue")
+#         # access function
+#         function(name=NULL, value = NULL){
+#                 if(is.null(name)) {
+#                         warning("initdefaults : You must supply a name",
+#                                 immediate. = TRUE, call. = TRUE)
+#                         NULL
+#                 } else {
+#                         if (!is.null(value)) {
+#                                 defaultvalue[[name]] <<- value
+#                                 defaultvalue[[name]]
+#                         } else {defaultvalue[[name]]}
+#                 }
+#         }
+# }
+#
+#
+# # set up access function and some defaults
+# sfdefault <- initdefaults()
+# sfdefault("language","french")
+# if(sfdefault("language") == "french") {
+#         sfdefault("namesum", sfdefault("namesumfrench"))
+# }
+# sfdefault("reportNA", FALSE)
+#
 
 # # testing
 # sfdefault()
@@ -85,78 +85,78 @@ sfdefault("reportNA", FALSE)
 # simple and multiple summary tables # =======================================
 
 
-# vector of summaries for 1 variable
-sumvector <- function (var, dnames = sfdefault("namesum"), reportNA = sfdefault("reportNA")) {
-        if (length(var) == 0) {
-                sapply(numeric(length = 9), function(x) NA)
-        }else {# construct a more complete summary vector
-                s <- summary(var)
-                if (length(s) < 7) {s <- c(s, rep(0, times=7-length(s)))}
-                ret <- numeric(3)
-                ret[1] <- sum(!is.na(var))
-                ret[2] <-  s["Mean"]
-                ret[3] <- sd(var, na.rm = TRUE)
-                s <- c(ret,s[-4])
-                names(s) <- dnames
-                if (reportNA) {s} else {s[1:(length(s) - 1)] }
-        }
-}
-
-
-
-# summary(mpg$hwy)
+# # vector of summaries for 1 variable
+# sumvector <- function (var, dnames = sfdefault("namesum"), reportNA = sfdefault("reportNA")) {
+#         if (length(var) == 0) {
+#                 sapply(numeric(length = 9), function(x) NA)
+#         }else {# construct a more complete summary vector
+#                 s <- summary(var)
+#                 if (length(s) < 7) {s <- c(s, rep(0, times=7-length(s)))}
+#                 ret <- numeric(3)
+#                 ret[1] <- sum(!is.na(var))
+#                 ret[2] <-  s["Mean"]
+#                 ret[3] <- sd(var, na.rm = TRUE)
+#                 s <- c(ret,s[-4])
+#                 names(s) <- dnames
+#                 if (reportNA) {s} else {s[1:(length(s) - 1)] }
+#         }
+# }
 #
-# sumvector(dtf$cval1)
-# sumvector(dtf[["cval1"]])
-# sumvector(dtf[ ,"cval1"])
-# sumvector(mpg$hwy)
 #
-# sv <- sumvector(mpg[["hwy"]])
-# sv
-# t(sv)
 #
-# sumtable(mpg[["hwy"]])
-
-
-
-# combined summaries for different variables in a dataframe, for the same individuals
-cbsummaries <- function (dataf, vnames) {
-        # vnames = a vector of variable names (each a numeric variable of dataf)
-        lsum = lapply(vnames, function(nam) sumvector(dataf[[nam]]))
-        df <- do.call(what = data.frame, args = lsum)
-        colnames(df) <- vnames
-        # rownames(df) <- namesum
-        df
-}
-
-# # test
-# cb <- cbsummaries(dtf, c("cval1", "cval2", "dval1", "dval2"))
-# round(cb,2)
-# cb2 <- cbsummaries(mpg, c("hwy", "cty")) # OK
-# round(cb2,2)
-# rownames(cb2)
-
-# combined summaries for one variable, conditional to the values of a factor
-
-condsummaries <- function (dataf, vname, fname) {
-        # vname = the variable name
-        # fname = the factor name
-        # levels: if not factor, make it a factor and take the levels
-        if (is.factor(dataf[[fname]])) {
-                lv <- levels(dataf[[fname]])
-        } else {
-                lv <- levels(factor(dataf[[fname]]))
-        }
-        lsum = lapply(lv ,
-                      FUN=function(lev) {
-                              dt <- dataf[dataf[[fname]]==lev , ]
-                              sumvector(dt[[vname]])
-                      } )
-        df <- do.call(what = data.frame, args = lsum)
-        colnames(df) <- lv
-        # rownames(df) <- namesum # rownames are preserved
-        df
-}
+# # summary(mpg$hwy)
+# #
+# # sumvector(dtf$cval1)
+# # sumvector(dtf[["cval1"]])
+# # sumvector(dtf[ ,"cval1"])
+# # sumvector(mpg$hwy)
+# #
+# # sv <- sumvector(mpg[["hwy"]])
+# # sv
+# # t(sv)
+# #
+# # sumtable(mpg[["hwy"]])
+#
+#
+#
+# # combined summaries for different variables in a dataframe, for the same individuals
+# cbsummaries <- function (dataf, vnames) {
+#         # vnames = a vector of variable names (each a numeric variable of dataf)
+#         lsum = lapply(vnames, function(nam) sumvector(dataf[[nam]]))
+#         df <- do.call(what = data.frame, args = lsum)
+#         colnames(df) <- vnames
+#         # rownames(df) <- namesum
+#         df
+# }
+#
+# # # test
+# # cb <- cbsummaries(dtf, c("cval1", "cval2", "dval1", "dval2"))
+# # round(cb,2)
+# # cb2 <- cbsummaries(mpg, c("hwy", "cty")) # OK
+# # round(cb2,2)
+# # rownames(cb2)
+#
+# # combined summaries for one variable, conditional to the values of a factor
+#
+# condsummaries <- function (dataf, vname, fname) {
+#         # vname = the variable name
+#         # fname = the factor name
+#         # levels: if not factor, make it a factor and take the levels
+#         if (is.factor(dataf[[fname]])) {
+#                 lv <- levels(dataf[[fname]])
+#         } else {
+#                 lv <- levels(factor(dataf[[fname]]))
+#         }
+#         lsum = lapply(lv ,
+#                       FUN=function(lev) {
+#                               dt <- dataf[dataf[[fname]]==lev , ]
+#                               sumvector(dt[[vname]])
+#                       } )
+#         df <- do.call(what = data.frame, args = lsum)
+#         colnames(df) <- lv
+#         # rownames(df) <- namesum # rownames are preserved
+#         df
+# }
 
 #tests
 # condsummaries(dtf, "cval1", "nam1")
@@ -387,6 +387,8 @@ cbydboxjit(dtf, vard = "dval1", varc = "dval2", labelall = "Together", labelgrou
 
 # creating function for base plot -------------------------------------------------------------
 
+
+# continuous x factor boxplot & jitter plot
 
 cbyfboxjit <- function(dataf, varf, varc, useNA = "no",
                        labellayer = "", labelall = "All values", labelgroups = "by goup") {

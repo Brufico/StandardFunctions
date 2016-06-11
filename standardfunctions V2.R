@@ -1,22 +1,36 @@
-# **********************************************************************
-# Standard functions for basic stat analysis
-# *********************************************************************
+#'---
+#'title: "Standard Functions for Basic Statistical Analysis"
+#'subtitle: code in standardfunctions V2.R
+#'author: "Bruno Fischer Colonimos"
+#'date: "11 june 2016"
+#'abstract: |
+#'      This is the code, presented as a notebook.
+#'      It should help readability.
+#'output:
+#'  html_document:
+#'    number_sections: yes
+#'    toc: yes
+#'    theme: readable
+#'  word_document: default
+#'  pdf_document:
+#'    toc: yes
+#'---
 
+#'
+
+
+#+ init, include=FALSE
+library(knitr)
+# opts_chunk$set(results="hide")
 
 library(ggplot2)
 library(dplyr)
 
-#library(reshape2)
 
 
+#' Constants and default options settings
+#' ======================================
 
-
-#' helper functions
-#'=======================================================
-
-
-#' constants and Default options settings
-#' ------------------------------------------------------
 
 # sfinitdefaults sets some constants in the data structure and returns a
 # function that gets and sets global options
@@ -49,7 +63,9 @@ sfinitdefaults <- function () {
 
 
 #' set up access function and some defaults
-#' ---------------------------------------
+
+#+ sfdefaults, results = "hide"
+
 sfdefault <- sfinitdefaults()
 
 sfdefault("language","french")
@@ -64,6 +80,9 @@ sfdefault("digits", 2)
 
 
 
+
+#' Helper functions
+#'=======================================================
 
 
 #' Simple and multiple summary tables
@@ -124,11 +143,6 @@ condsummaries <- function (dataf, vname, fname) {
 
 
 
-
-
-
-
-
 #' Frequency tables
 #' --------------------------------------------------------------
 
@@ -147,14 +161,11 @@ condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
 
 
 
-
-
-
-
-#'  reordering factors
-#'  -------------------------------------------------
-
-# new definition seems ok for both data frame and tbl_df
+#'
+#' reordering factors
+#' -------------------------------------------------
+#'
+# new definition seems ok for both data.frame and tbl_df
 orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
                       ordervar = "c..nt", orderval = NA, orderfun = sum,
                       nlevels = NULL) {
@@ -192,7 +203,7 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
         resfact
 }
 
-
+#'
 #' Statistical Testing functions
 #' ---------------------------------------------------------------
 
@@ -238,26 +249,28 @@ try.chisq.test <- function(..., keep.all = TRUE) {
 
 
 
-#' Fonctions d'analyse simples
+#' Main analysis functions
 #' ================================================================
 
-#' Résultat désiré
-#' **une variable**
+#' **Résultat désiré:**
+#'
+#' *  **une variable**
+#'     * cat1  1 facteur
+#'     * num1c 1 variable continue
+#'     * num1d 1 variables discrete
+#'
+#' *  **deux variables**
+#'     * cat2  2 facteurs
+#'     * cat1num1
+#'     * num2
+#'
 
-#' * cat1  1 facteur
-#' * num1c 1 variable continue
-#' * num1d 1 variables discrete
-
-#' **deux variables**
-
-#' * cat2  2 facteurs
-#' * cat1num1
-#' * num2
 
 
-
-#'  cat1
-#'  --------------------------------------------------------------------
+#'
+#' cat1
+#' --------------------------------------------------------------------
+#'
 
 # new definition OK
 cat1 <- function(dataf, nomfact, useNA = "no",
@@ -318,7 +331,7 @@ cat1 <- function(dataf, nomfact, useNA = "no",
 }
 
 
-#' num1d (**d** iscrete)
+#' num1d = 1 numeric d(iscrete)
 #' -------------------------------------------------------------------------
 
 
@@ -370,7 +383,7 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
 
 
 
-#' num1c
+#' num1c = 1 numeric c(ontinuous)
 #' ---------------------------------------------------------------------------------
 
 # another helper function
@@ -459,7 +472,7 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
 
 
 
-#' cat2
+#' cat2 = 2 categorical vars
 #' ---------------------------------------------------------------------
 
 # definition
@@ -551,10 +564,48 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
         )
 }
 
-# cat1num1c ==================================================================
+#' cat1num1
+#' -------------------------------------------------------------------------
 #
-# fonctions de graphique
+# fonctions de détermination du nombre de classes dabs un histogramme
+# nclass.Sturges(mpg$hwy)
+# nclass.FD(mpg$hwy)
+# nclass.scott(mpg$hwy)
+#
+#
+#' ### fonctions de generation de graphiques
+#'
+
+# continuous x factor boxplot & jitter plot
+cbyfboxjit <- function(dataf, varf, varc, useNA = "no",
+                       labellayer = "", labelall = "All values", labelgroups = "by goup") {
+
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        ggplot(dataf,aes_(as.name(varf) , as.name(varc), color=as.name(varf))) +
+                geom_boxplot(aes(group = 1, fill =  labelall), outlier.colour = "gray") +
+                geom_boxplot(aes(fill = labelgroups), varwidth = TRUE, outlier.colour = "gray") +
+                geom_jitter( width =.5, alpha=.5) +
+                labs(fill = labellayer)
+}
 
 
+# continuous x discrete boxplot & jitter plot
+cbydboxjit <- function(dataf, vard, varc, useNA = "no",
+                       labellayer = "", labelall = "All values", labelgroups = "by goup") {
+        # dataf <- as.data.frame(dataf) # same problem with tbl_df
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[vard]]) & !is.na(dataf[[varc]]), ]
+        }
+        dataf$fact_vard. <- factor(dataf[[vard]])
+        ggplot(dataf,aes_(as.name(vard) , as.name(varc), color=quote(fact_vard.))) +
+                geom_boxplot(aes(group = 1, fill =  labelall), outlier.colour = "gray") +
+                geom_boxplot(aes(fill = labelgroups), varwidth = TRUE, outlier.colour = "gray") +
+                geom_jitter( width =.5, alpha=.5) +
+                labs(fill = labellayer)
+}
 
+
+# cat1num1c
 
