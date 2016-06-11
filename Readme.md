@@ -1,13 +1,16 @@
 --- 
 title: "Standard Functions for Basic Statistical Analysis"
+subtitle: "Readme file"
 author: "Bruno Fischer Colonimos"
 date: "4 juin 2016"
 output:
-  pdf_document: 
-    toc: yes
   html_document:
+    css: customex2.css
     number_sections: yes
     theme: readable
+    toc: yes
+  pdf_document: 
+    toc: yes
   word_document: default
 ---
 
@@ -405,8 +408,8 @@ try.chisq.test(..., keep.all = TRUE)
 
 #### Arguments {-}
 
-..., ==> The arguments to chisq.test
-keep.all = TRUE ==> return all the results (if TRUE), or only a valid test 
+`...` ==> The arguments to chisq.test\
+`keep.all` = TRUE ==> return all the results (if TRUE), or only a valid test 
 
 #### Value {-} 
 
@@ -513,7 +516,7 @@ mc$plot + geom_text(data=mc$table, aes(x=class, y = 100 * rfreq - 1.5,
 ```
 
 
-### num1d : Analyze one numerical variable (discrete)
+### Function num1d : Analyze one numerical variable (discrete)
 
 #### Usage {-} 
 
@@ -558,7 +561,7 @@ A named list:
 cyl$plot + xlab("Cylinders") + ylab("Percentage") 
 ```
 
-### cat2 : Analyze two categorical variable (factors) together
+### Function cat2 : Analyze two categorical variable (factors) together
 
 #### Usage {-} 
 ```
@@ -636,7 +639,7 @@ Templates
 ===========================
 
 
-### Namefun : Template ---
+### Function Namefun : Template ---
 
 #### Usage {-}
 

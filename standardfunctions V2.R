@@ -11,6 +11,7 @@
 #'    number_sections: yes
 #'    toc: yes
 #'    theme: readable
+#'    css: customex2.css
 #'  word_document: default
 #'  pdf_document:
 #'    toc: yes
@@ -388,12 +389,24 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
 
 # another helper function
 # make class labels from bins vector
-mkclabs <- function(bins, sep = " - ") {
-        left <- head(bins, length(bins) - 1)
-        right <- tail(bins, length(bins) - 1)
-        mapply(function(x,y){paste(x,y,sep = sep)},
+mkclabs <- function(breaks, sep = " - ", closed = NULL) {
+        if (is.null(closed)) {closed <- "right"} # default close="right"
+        closed
+        if (closed == "right") {
+                bchar <- "]"
+        } else if (closed == "left") {
+                bchar <- "["
+        } else {
+                bchar <- "|"
+                warning("Invalid 'closed' argument in mkclabs")
+        }
+
+        left <- head(breaks, length(breaks) - 1)
+        right <- tail(breaks, length(breaks) - 1)
+        mapply(function(x,y){paste0(bchar,x, sep , y, bchar)},
                left, right, SIMPLIFY =TRUE)
 }
+
 
 # another helper: NA's remover
 nonavect <- function(vect) {vect[which(!is.na(vect))]}
@@ -403,7 +416,7 @@ nonavect <- function(vect) {vect[which(!is.na(vect))]}
 # num1c
 num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
                   fillhist = "steelblue", color_density = "red", digits = 2, # à modifier
-                  bins = NULL, ...) {  # ... = addtl arguments for geom_hist
+                  bins = NULL, closed = NULL, ...) {  # ... = addtl arguments for geom_hist
         if (plot_density) {usedensity <- TRUE} # plot_density overrides usedensity
         # bins = Null, integer, or a function name : "nclass.Sturges", "nclass.FD" , "nclass.scott"
         if (!is.null(bins)) {
@@ -436,7 +449,7 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
         # get bins vector
         cbins <- with(tb, c(xmin[1],xmax))
         # make class lablels
-        clabs <- mkclabs(cbins)
+        clabs <- mkclabs(cbins, closed = closed)
         # make a printable table
         ptb <- data.frame(
                 class = clabs,
@@ -607,5 +620,33 @@ cbydboxjit <- function(dataf, vard, varc, useNA = "no",
 }
 
 
-# cat1num1c
+
+
+#'### cat1num1c
+
+if (FALSE) {
+
+catnum1c <- function(dataf, nomfact, nomvar,  useNA = "no",
+                     orderfreq1 = TRUE, orderdesc1 = TRUE, ordervar1 = "c..nt",
+                     orderval1 = NA, orderfun1 = sum, nlevel1 =NULL,
+                     rfreq = TRUE, digits = 2, cfill = "steelblue"){
+
+        # desired return value
+        list(name = c(nomfact1, nomfact2),
+             levels = list(levels1 =levels(dataf[[nomfact1]]),
+                           levels2 =levels(dataf[[nomfact2]]) ),
+             tables =list(tbl=tbl, tblcrois=tblcrois, tbl1=tbl1, tbl2=tbl2),
+             num = num,
+             ichisq = ichisq,
+             plot = pt
+
+        )
+
+}
+
+} # of comment
+
+
+
+
 

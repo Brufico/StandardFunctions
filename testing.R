@@ -257,7 +257,7 @@ num1c(mpg,"hwy", bins = "nclass.FD")
 num1c(mpg,"hwy", binwidth=3, plot_density = TRUE)
 num1c(mpg,"hwy", breaks = seq(from=10,to=46, by=4), plot_density = TRUE)
 num1c(mpg,"hwy", breaks = seq(from=11,to=46, by=3), plot_density = TRUE)
-num1c(mpg,"hwy", breaks = seq(from=11,to=46, by=3))
+num1c(mpg,"hwy", breaks = seq(from=11,to=46, by=3), closed = "left")
 
 num1c(mpg,"hwy", breaks = c(seq(from=11,to=38, by=3), 44), plot_density = TRUE)
 num1c(mpg,"hwy", usedensity = TRUE, breaks = seq(from=10,to = 45, by=5))
@@ -284,6 +284,8 @@ ctypt$plot + geom_text(data=ctypt$table$ggtable, aes(x, y/2, label=perclabs)) +
         labs(title="City mpg distribution")
 
 
+
+# explore
 ctypt$table$ggtable$ndensity  /ctypt$table$ggtable$rfreq
 
 
@@ -302,6 +304,16 @@ c2r <- num1c(dtf,"cval2", breaks=seq(1.5, 19.5, by=3), plot_density = TRUE)
 
 print(c2r$plot)
 print(c2r$tables$ptable[c(1,3, 4)])
+
+
+# new tries
+# data
+dat <- data.frame(f = rep(c("a", "b"), 8),
+                  x = c( rep(2, 3), rep(3, 4),rep(4, 5),rep(5, 3),6 ))
+dat
+
+p <-
+
 
 # cat2 ==================================================================
 
