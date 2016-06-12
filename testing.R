@@ -176,7 +176,7 @@ tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc =
 tp
 tp$plot
 tp$table
-
+tp$ptable
 
 # ##b
 tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc = FALSE,
@@ -184,6 +184,7 @@ tp <- cat1(dtf, "nam1", useNA= "no", rfreq = TRUE, orderfreq = TRUE, orderdesc =
 tp
 tp$plot
 tp$table
+tp$ptable
 
 # plot annotation
 tp$plot + geom_text(data=tp$table , aes( x=nam1, y = 100 * rfreq - 1.5, label=numlabs))
@@ -196,6 +197,7 @@ tp$plot +
                       y = "pourcentage")
 
 # tp$levels are for transferring level order if needed:
+tp$levels
 
 ## testing with mpg
 mc <- cat1(mpg, "class")
@@ -218,7 +220,7 @@ mc$plot +
              y = "percentage")
 
 # get pvalue
-mc$uchisq$test1$p.value
+mc$chi2$test1$p.value
 
 
 
