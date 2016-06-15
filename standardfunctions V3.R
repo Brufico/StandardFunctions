@@ -1,6 +1,6 @@
 #'---
 #'title: "Standard Functions for Basic Statistical Analysis"
-#'subtitle: code in standardfunctions V2.R
+#'subtitle: R code in standardfunctions V2.R
 #'author: "Bruno Fischer Colonimos"
 #'date: "11 june 2016"
 #'abstract: |
@@ -82,52 +82,7 @@ sfdefault("digits", 2)
 #' Return values structure
 #' ======================================
 
-#' The return value of the function is sructured as a named list of the following elements
-#'
-#' name
-#' ~ the name of the variable or a vector of names
-#'
-#' * some summaries and tables
-#'
-#'numcases
-#'~ the number of cases
-#'
-#' summaries
-#' ~ a vector (or table ?) of numerical summaries
-#'
-#' levels
-#' ~ the levels of the (potentially reordered) factor
-#'
-#' breaks
-#' ~ the breaks used (for a continuous variable)
-#'
-#' closed
-#' ~ the `closed` argument that goes with breaks (cf `cut` or `geom_histogram`)
-#'
-#' table
-#' ~ a table
-#'
-#' tabledf
-#' ~ a dataframe table
-#'
-#' ptable
-#' ~ a printable table
-#'
-#'
-#' * some tests
-#'
-#'
-#' chi2
-#' ~ Chisquare test
-#'
-#' anova
-#' ~ oneway()
-#'
-#' * some plots
-#'
-#' plot
-#' ~ an appropriate plot
-#'
+
 
 
 # make a result list. unsupplied elements assigned default=NULL and not included in result list
@@ -164,13 +119,84 @@ make.result <- function(name = NULL,
 #' Helper functions
 #'=======================================================
 
+#'
+#' General utility functions
+#' ------------------------------------------------
+#'
+
+#'assoc.op : associative operator function: apply a binary operator or function
+#'to a list of (many) arguments
+#'
+#'opname
+#'~ the operator/function name (string)
+#'
+#'listargs
+#'~ the list of arguments to apply the operator to
+#'
+#'returns: a single result (of any type)
+
+assoc.op <- function(opname, listargs) {
+        xfun <- function(listargs, res) {
+                if (length(listargs) == 0) {
+                        res
+                } else{
+                        xfun(listargs[-1],
+                             do.call(opname,
+                                     list(res,  listargs[[1]])))
+                }
+        }
+
+        if (length(listargs) > 0) {
+                xfun(listargs[-1], res = listargs[[1]])
+        } else {warning("argument listargs has lenth 0")
+                logical(0)
+        }
+}
+
+#'
+#' Functions for filtering out NA's
+#' --------------------------------
+
+#'
+#'* from a dataframe/tbl
+#'
+#' ... is a succession of variable names which we want to filter out the NAs
+#' from ( ex: nonadf(dataframe, "age", "revenue"))
+#'
+nonadf <- function(dataf, ..., useNA = "no") {
+        lvar = list(...)
+        lseq = seq_along(lvar)
+        if (useNA == "no") {
+                # make list of logical vectors
+                llogicals <- lapply(
+                        X = lvar,
+                        FUN = function(nomvar) {
+                                !is.na(dataf[[nomvar]])
+                        }
+                )
+                # combine all with 'and' operator (&)
+                andlogicals <- assoc.op("&", llogicals)
+                dataf[which(andlogicals),]
+        } else {
+                dataf
+        }
+}
+
+#'
+#'* from a vector
+#'
+nonavect <- function(vect) {vect[which(!is.na(vect))]}
+
+
+
 
 #' Simple and multiple summary tables
 #' ------------------------------------------------
 # (nb of cases, mean, stdev, five-number-summary, optionally nb of NA's)
 
 #' vector of summaries for 1 quant variable
-sumvector <- function (var, dnames = sfdefault("namesum"), reportNA = sfdefault("reportNA")) {
+sumvector <- function (var, dnames = sfdefault("namesum"),
+                       reportNA = sfdefault("reportNA")) {
         if (length(var) == 0) {
                 sapply(numeric(length = 9), function(x) NA)
         }else {# construct a more complete summary vector
@@ -200,7 +226,7 @@ cbsummaries <- function (dataf, vnames) {
 
 
 #' Combined summaries for one variable, *conditional* to the values of a factor
-condsummaries <- function (dataf, vname, fname) {
+condsummaries <- function(dataf, vname, fname) {
         # vname = the variable name
         # fname = the factor name
         # levels: if not factor, make it a factor and take the levels
@@ -225,6 +251,16 @@ condsummaries <- function (dataf, vname, fname) {
 
 #' Frequency tables
 #' --------------------------------------------------------------
+
+
+# joint frequency table
+jointfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[nomfact1]]) & !is.na(dataf[[nomfact2]]) , ]
+        }
+        table(dataf[[nomfact1]], dataf[[nomfact2]] , useNA = useNA)
+}
+
 
 # new . fonctionne avec des tbl_df aussi
 condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
@@ -497,8 +533,6 @@ mkclabs <- function(breaks, sep = " - ", closed = NULL) {
 }
 
 
-# another helper: NA's remover
-nonavect <- function(vect) {vect[which(!is.na(vect))]}
 
 
 
@@ -710,25 +744,109 @@ cbydboxjit <- function(dataf, vard, varc, useNA = "no",
 
 
 
+# continuous by factor density plot
+cbyfdensity <- function(dataf, varf, varc, useNA = "no") {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+        ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf))) +
+                geom_density(alpha = 0.3)
+}
+
+
+# freqpoly
+cbyffreqpoly <- function(dataf, varf, varc, useNA = "no", size = 1) {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+        ggplot(dataf,aes_(as.name(varc), y=quote(..ndensity..), color=as.name(varf))) +
+                geom_freqpoly(size = size)
+}
+
+
+
+cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, ...) {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+
+        s <- condsummaries(dataf,vname = varc, fname = varf )
+
+        p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
+        } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
+        p <- p+ geom_histogram(..., position = "dodge")
+        # return named list
+        # list(name = c(varc , varf),
+        #      summaries = s,
+        #      table = NULL, #tb,
+        #      num = NA, #num
+        #      uchisq = NULL, # uchisq
+        #      plot = p)
+        p
+}
+
+
+# faceted histogram
+#
+cbyffachistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, ...) {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+
+
+        p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
+        } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
+        p <- p+ geom_histogram(...)
+
+        form <- as.formula(paste0(varf,"~."))
+        p+ facet_grid(form)
+}
+
+
+
+
+
+
+
 
 #'### cat1num1c
 
 if (FALSE) {
 
 catnum1c <- function(dataf, nomfact, nomvar,  useNA = "no",
-                     orderfreq1 = TRUE, orderdesc1 = TRUE, ordervar1 = "c..nt",
-                     orderval1 = NA, orderfun1 = sum, nlevel1 =NULL,
-                     rfreq = TRUE, digits = 2, cfill = "steelblue"){
+                     orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
+                     orderval = NA, orderfun = sum, nlevel =NULL,
+                     breaks = NULL, closed= NULL,
+                     rfreq = TRUE, digits = 2, cfill = sfdefault("filldefault")){
+        # Planned:
+        # name = NULL,
+        # numcases = NULL,
+        # summaries = NULL,
+        # levels = NULL,
+        # breaks = NULL,
+        # closed= NULL,
+        # table = NULL,
+        # tabledf = NULL,
+        # ptable = NULL,
+        # chi2 = NULL,
+        # anova = NULL,
+        # plot = NULL )
 
-        # desired return value
-        # list(name = c(nomfact1, nomvar),
-        #      levels = levels1 =levels(dataf[[nomfact1]]),
-        #      tables = list(tbl=tbl, tblcrois=tblcrois, tbl1=tbl1, tbl2=tbl2),
-        #      num = num,
-        #      ichisq = ichisq,
-        #      plot = pt
-        #
-        # )
+        # name
+        name=c(nomvar, nomfact)
+        numcases = length(!is.na(dataf[[nomvar]] & !is.na(dataf[[nomfact]])))
+        # summaries
+        s <- condsummaries(dataf, nomvar, nomfact)
+        # levels
+        levels = levels(dataf[[nomfact]]) # see if reorder
+        # breaks
+        # breaks = breaks # include in output, nothing to compute ??? depends
+        # table
+        # table <-
 
 }
 

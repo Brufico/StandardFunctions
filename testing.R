@@ -14,9 +14,11 @@ library(dplyr)
 
 # helper functions -----------------------------------------------------
 
+
+
 # vlookup
 vlookup <- function(value, searchtable, searchcol = 1, returncol= 2){
-        searchtable[match(value, searchtable[ , searchcol]), returncol]
+        searchtable[match(value, searchtable[[searchcol]]), returncol]
 }
 
 # data generator -------------------------------------------------------
@@ -77,6 +79,32 @@ dtf <- make_testdata()
 # sfdefault("namesum", default("namesumfrench"))
 # sfdefault("namesum")
 
+
+
+
+# test assoc.op
+
+# composing logical vectors
+x <- c(T,F,F,T, T, T, F)
+y <- c(T,F,T,F, T, F, F)
+z <- c(T,T,T,T, T, T, F)
+
+assoc.op("&", list(x,y,z) )
+assoc.op("|", list(x,y,z) )
+
+
+# Test nonadf
+
+
+nonadf(dtf, "cval1", "cval2")
+nonadf(dtf, "cval1", "cval2", "nam1")
+nonadf(dtf, "cval1", "cval2", "nam1","dval2")
+
+
+
+# summaries:
+
+cbsummaries(mpg, c("hwy", "cty"))
 
 # TEST condfreqtable() -----------------------------------------------
 

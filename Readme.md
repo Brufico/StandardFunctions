@@ -138,10 +138,187 @@ if(sfdefault("language") == "french") {
 ```
 
 
--------------------------------------------------------------
+Code Description: Return values structure, creation and access
+==============================================================
+
+### Structure description
+
+The return value of the function is sructured as a **named list**
+of the following elements
+
+name
+~ the name of the variable or a vector of names
+
+* some summaries and tables
+
+numcases
+~ the number of cases
+
+summaries
+~ a vector (or table ?) of numerical summaries
+
+levels
+~ the levels of the (potentially reordered) factor
+
+breaks
+~ the breaks used (for a continuous variable)
+
+closed
+~ the `closed` argument that goes with breaks (cf `cut` or `geom_histogram`)
+
+table
+~ a table
+
+tabledf
+~ a dataframe table
+
+ptable
+~ a printable table
+
+
+* some tests
+
+
+chi2
+~ Chisquare test
+
+anova
+~ oneway()
+
+* some plots
+
+plot
+~ an appropriate plot
+
+
+The list of fields is yet incomplete.
+
+
+
+### Function make.result(): make a result list. 
+
+#### Usage {-}
+``` 
+make.result <- function(name = NULL, numcases = NULL, summaries = NULL,
+                        levels = NULL, breaks = NULL,closed= NULL,
+                        table = NULL, tabledf = NULL, ptable = NULL,
+                        chi2 = NULL, anova = NULL,
+                        plot = NULL ) 
+```
+
+#### Arguments {-}
+`<field>`     the value to assign do the field
+
+#### Value {-}
+
+A named list
+
+#### Details {-}
+Unsupplied elements are assigned default=NULL and not included in result list  
+For the time being, there is no functions layer to access the fields. 
+Simply do : list$field
+
+#### Example {-} 
+
+```
+# creation
+res <- make.result(name = "gender",
+                    numcases = 120,
+                    levels = c("man", "women"))
+# access
+res$numcases
+
+##[1] 120
+                  
+```
 
 Functions Description: Helper functions 
 =======================================
+
+General utility functions
+----------------------------------
+
+### Function assoc.op : associative operator function.
+
+#### Usage {-}
+
+```
+assoc.op(opname, listargs)
+```
+
+#### Arguments {-}
+opname 
+~ the operator/function name (string)
+
+listargs 
+~ the list of arguments to apply the operator to
+
+#### Value {-}
+a single result (of any type)
+
+#### Details {-}
+applies a binary operator or function to a list of (many) arguments
+
+#### Example {-}
+
+```
+x <- c(T, F, F, T, T, T, F)
+y <- c(T, F, T, F, T, F, F)
+z <- c(T, T, T, T, T, T, F)
+
+assoc.op("&", list(x,y,z) )
+##[1]  TRUE FALSE FALSE FALSE  TRUE FALSE FALSE
+
+assoc.op("|", list(x,y,z) )
+##[1]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE
+```
+
+
+Functions for filtering out NA's
+--------------------------------
+
+### Function nonadf(): filtering out NA's from a dataframe
+
+#### Usage {-}
+```
+nonadf(dataf, ..., useNA = "no")
+```
+
+#### Arguments {-}
+`dataf`
+~ a dataframe
+
+...
+~ a succession of variable names which we want to filter out the NAs from
+
+#### Value {-}
+
+#### Details {-}
+
+#### Example {-}
+```
+nonadf(dtf, "cval1", "cval2", "nam1","dval2")
+```
+
+### Function nonavect(): filtering out NA's from a vector
+
+#### Usage {-}
+```
+nonavect(vect)
+```
+
+#### Arguments {-}
+
+#### Value {-}
+
+#### Details {-}
+
+#### Example {-}
+```
+
+```
+
+
 
 Simple and multiple summary tables
 ----------------------------------
@@ -198,7 +375,7 @@ cbsummaries(dataf, vnames)
 
 #### Arguments {-}
 
-dataf  
+`dataf`  
 vnames = vector of variable names 
 
 #### Value {-}
@@ -210,7 +387,18 @@ the summary vectors, as columns of a dataframe
 #### Example {-} 
 
 ```
-cbsummaries(mpg, c("hwy", "cty")) 
+cbsummaries(mpg, c("hwy", "cty"))
+
+##
+                  hwy        cty
+n          234.000000 234.000000
+Moyenne     23.440000  16.860000
+Ecart-type   5.954643   4.255946
+Min.        12.000000   9.000000
+Q1          18.000000  14.000000
+Médiane     24.000000  17.000000
+Q3          27.000000  19.000000
+Max.        44.000000  35.000000
 
 ```
 

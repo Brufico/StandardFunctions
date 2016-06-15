@@ -434,9 +434,32 @@ cbyfdensity(mpg, "drv", "hwy")
 cbyfdensity(mpg, "cyl", "hwy")
 cbyfdensity(mpg, "cyl", "cty")
 
+
+
+
 windows()
-cbyfdensity(mpg, "drv", "hwy") +facet_grid(.~class)
+cbyfdensity(mpg, "drv", "hwy") +facet_grid(class~.)
 dev.off()
+
+
+# freqpoly
+cbyffreqpoly <- function(dataf, varf, varc, useNA = "no", size = 1) {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+        ggplot(dataf,aes_(as.name(varc), y=quote(..ndensity..), color=as.name(varf))) +
+                geom_freqpoly(size = size)
+}
+
+cbyffreqpoly(mpg, "drv", "hwy")
+cbyffreqpoly(mpg, "cyl", "hwy")
+cbyffreqpoly(mpg, "cyl", "cty")
+
+p1 <- cbyffreqpoly(mpg, "cyl", "hwy")
+p1
+p1+facet_grid(drv~.)
+
 
 
 
@@ -448,20 +471,43 @@ cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, .
                 dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
         }
         if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
-        s <- condsummaries(dataf,fname = varf, varc=varc)
+
+        s <- condsummaries(dataf,vname = varc, fname = varf )
+
         p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
                 } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
         p <- p+ geom_histogram(..., position = "dodge")
         # return named list
-        list(name = c(varc , varf)
-             summaries = s,
-             table = NULL, #tb,
-             num = NA, #num
-             uchisq = NULL, # uchisq
-             plot = p)
+        # list(name = c(varc , varf),
+        #      summaries = s,
+        #      table = NULL, #tb,
+        #      num = NA, #num
+        #      uchisq = NULL, # uchisq
+        #      plot = p)
+        p
 }
 
 p <- cbyfhistogram(mpg, "drv", "hwy", bins=10)
-
+p
 m <- ggplot_build(p)
 m
+
+
+
+cbyffachistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, ...) {
+        if (useNA == "no") {
+                dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
+        }
+        if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
+
+        p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
+        } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
+        p <- p+ geom_histogram(...)
+
+        form <- as.formula(paste0(varf,"~."))
+        p+ facet_grid(form)
+}
+
+cbyffachistogram(mpg, "drv", "hwy", bins=10)
+cbyffachistogram(mpg, "cyl", "hwy", bins=10, usedensity = TRUE)
+
