@@ -799,7 +799,8 @@ cbyffreqpoly <- function(dataf, varf, varc, useNA = "no", size = 1) {
 
 
 
-cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, ...) {
+cbyfhistogram <- function(dataf, varf, varc, useNA = "no",
+                          usedensity = FALSE, usendensity = FALSE, ...) {
         if (useNA == "no") {
                 dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
         }
@@ -808,6 +809,7 @@ cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, .
         # s <- condsummaries(dataf,vname = varc, fname = varf )
 
         p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
+        } else if (usendensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..ndensity..), fill=as.name(varf)))
         } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
         p <- p+ geom_histogram(..., position = "dodge")
         p
@@ -816,15 +818,21 @@ cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, .
 
 # faceted histogram
 #
-cbyffachistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, ...) {
+cbyffachistogram <- function(dataf, varf, varc, useNA = "no",
+                             usedensity = FALSE, usendensity = FALSE, ...) {
         if (useNA == "no") {
                 dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
         }
         if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
 
 
-        p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
-        } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
+        p <- if (usedensity) {
+                ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
+        } else if (usendensity){
+                ggplot(dataf,aes_(as.name(varc), y=quote(..ndensity..), fill=as.name(varf)))
+        } else {
+                ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))
+                }
         p <- p+ geom_histogram(...)
 
         form <- as.formula(paste0(varf,"~."))

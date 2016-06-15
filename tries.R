@@ -487,20 +487,26 @@ cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, .
         p
 }
 
-p <- cbyfhistogram(mpg, "drv", "hwy", bins=10)
+p <- cbyfhistogram(mpg, "drv", "hwy", bins=nclass.FD(mpg$hwy))
+p <- cbyfhistogram(mpg, "drv", "hwy", binwidth=2)
+p <- cbyfhistogram(mpg, "drv", "hwy", breaks=seq(11,45,by=2))
+p <- cbyfhistogram(mpg, "drv", "hwy", breaks=seq(11,45,by=2), usedensity = TRUE)
+p <- cbyfhistogram(mpg, "drv", "hwy", breaks=seq(11,45,by=2), usendensity = TRUE)
 p
 m <- ggplot_build(p)
 m
 
 
 
-cbyffachistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, ...) {
+cbyffachistogram <- function(dataf, varf, varc, useNA = "no",
+                             usedensity = FALSE,usendensity = FALSE, ...) {
         if (useNA == "no") {
                 dataf <- dataf[!is.na(dataf[[varf]]) & !is.na(dataf[[varc]]), ]
         }
         if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
 
         p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
+        } else if (usendensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..ndensity..), fill=as.name(varf)))
         } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
         p <- p+ geom_histogram(...)
 
@@ -508,6 +514,11 @@ cbyffachistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE
         p+ facet_grid(form)
 }
 
-cbyffachistogram(mpg, "drv", "hwy", bins=10)
-cbyffachistogram(mpg, "cyl", "hwy", bins=10, usedensity = TRUE)
+p <- cbyffachistogram(mpg, "drv", "hwy", bins=10)
+p
+ggplot_build(p)
+ggplot_gtable()
 
+cbyffachistogram(mpg, "cyl", "hwy", bins=10)
+cbyffachistogram(mpg, "cyl", "hwy", bins=10, usedensity = TRUE)
+cbyffachistogram(mpg, "cyl", "hwy", bins=10, usendensity = TRUE)
