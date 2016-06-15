@@ -334,7 +334,7 @@ cbydboxjit <- function(dataf, vard, varc, useNA = "no",
         dataf$fact_vard. <- factor(dataf[[vard]])
         ggplot(dataf,aes_(as.name(vard) , as.name(varc), color=quote(fact_vard.))) +
                 geom_boxplot(aes(group = 1, fill =  labelall), outlier.colour = "gray") +
-                geom_boxplot(aes(fill = labelgroups), varwidth = TRUE, outlier.colour = "gray") +
+                geom_boxplot(aes(fill = labelgroups), varwidth = TRUE, outlier.colour = "gray", alpha=.5)+
                 geom_jitter( width =.5, alpha=.5) +
                 labs(fill = labellayer)
 }

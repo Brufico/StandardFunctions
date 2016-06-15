@@ -264,7 +264,7 @@ res$plot + xlab("Exemple") + ylab("Pourcentage")
 #
 res <- num1d(dtf, "dval2", rfreq = FALSE)
 res$plot
-res$uchisq$test1
+res$chi2$test1
 
 # test with mpg
 res <- num1d(mpg, "cyl")
@@ -275,7 +275,7 @@ res$plot + xlab("Cylinders") + ylab("Percentage")
 # # tests for num1c ===================================================
 # tests for mkclabs
 mkclabs( c(1,2,4,6))
-
+mkclabs( c(1,2,4,6), closed ="left")
 # test for nonavect
 nonavect(c(2,4, 6, NA, 10))
 
@@ -310,19 +310,20 @@ num1c(mpg,"cty", breaks = seq(from=8,to=38, by= 3), plot_density = TRUE)
 
 ctypt <- num1c(mpg,"cty", breaks = c(seq(from=8,to=28, by=2),36), plot_density = TRUE)
 
-ctypt$plot + geom_text(data=ctypt$table$ggtable, aes(x, y/2, label=perclabs)) +
+ctypt$plot + geom_text(data=ctypt$table, aes(x, y/2, label=perclabs)) +
         labs(title="City mpg distribution")
 
 
 
 # explore
-ctypt$table$ggtable$ndensity  /ctypt$table$ggtable$rfreq
+ctypt$table$ndensity  /ctypt$table$rfreq
 
 
 
 num1c(dtf,"cval1", bins = "nclass.FD")
 num1c(dtf,"cval1", binwidth = 1)
 num1c(dtf,"cval1", breaks=seq(2, 7, by=1), plot_density = TRUE)
+num1c(dtf,"cval1", breaks=seq(2, 7, by=1), closed = "left", plot_density = TRUE)
 num1c(dtf,"cval1", breaks=seq(1.5, 7.5, by=1), plot_density = TRUE)
 num1c(dtf,"cval1", breaks=seq(2, 7, by=.5), plot_density = TRUE)
 
@@ -330,19 +331,26 @@ num1c(dtf,"cval2", bins = "nclass.FD", plot_density = TRUE)
 num1c(dtf,"cval2", binwidth = 3, plot_density = TRUE)
 
 num1c(dtf,"cval2", breaks=seq(3, 18, by=3), plot_density = TRUE)
-c2r <- num1c(dtf,"cval2", breaks=seq(1.5, 19.5, by=3), plot_density = TRUE)
 
+c2r <- num1c(dtf,"cval2", breaks=seq(1.5, 19.5, by=3), closed = "left", plot_density = TRUE)
 print(c2r$plot)
-print(c2r$tables$ptable[c(1,3, 4)])
+print(c2r$ptable[c(1,3, 4)])
 
 
-# new tries
+# new tries fpr the 'closed' argument
 # data
+set.seed(2)
 dat <- data.frame(f = rep(c("a", "b"), 8),
-                  x = c( rep(2, 3), rep(3, 4),rep(4, 5),rep(5, 3),6 ))
+                  x = c( rep(2, 3), rep(3, 4),rep(4, 5),rep(5, 3),6 ) +
+                          sample(x = c(0,.5), size = 16,replace = TRUE))
 dat
 
-p <-
+num1c(dat,"x")
+num1c(dat,"x", bins="nclass.FD")
+num1c(dat,"x", binwidth = 1)
+num1c(dat,"x", breaks = seq(1.5, 6.5,by = 1))
+num1c(dat,"x", breaks = seq(1.5, 6.5, by = 1))
+num1c(dat,"x", breaks = seq(2, 7, by = 1), closed = "left")
 
 
 # cat2 ==================================================================
@@ -360,8 +368,8 @@ print(p2$plot)
 
 # plot annotation and data labels
 p2$plot +
-        geom_text(data = p2$table$tbl1 , aes(x = nam1, y = .05, label = numlabs)) +
-        geom_text(data = p2$table$tbl1 , aes(x = nam1,
+        geom_text(data = p2$table , aes(x = nam1, y = .05, label = numlabs)) +
+        geom_text(data = p2$table , aes(x = nam1,
                                              y = percval - 0.03,
                                              label = ifelse( index <= 2, perclabs, ""))) +
         theme(axis.text.x = element_text(angle=45, hjust=1)) +
@@ -369,28 +377,28 @@ p2$plot +
              x = "",
              y = "pourcentage")
 
-
-mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "f", orderfun1 = mean)
-mp2
-mp2$plot +
-        geom_text(data = mp2$table$tbl1 , aes(x = class, y = -.05, label = numlabs)) +
-        geom_text(data = mp2$table$tbl1 , aes(x = class,
-                                             y = percval - 0.03,
-                                             label = ifelse( index <= 4, perclabs, ""))) +
-        theme(axis.text.x = element_text(angle=45, hjust=1)) +
-        labs(title = "Drive per class",
-             x = "Class",
-             y = "percentage")
-
-
+#
+# mp2 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "f", orderfun1 = mean)
+# mp2
+# mp2$plot +
+#         geom_text(data = mp2$table$tbl1 , aes(x = class, y = -.05, label = numlabs)) +
+#         geom_text(data = mp2$table$tbl1 , aes(x = class,
+#                                              y = percval - 0.03,
+#                                              label = ifelse( index <= 4, perclabs, ""))) +
+#         theme(axis.text.x = element_text(angle=45, hjust=1)) +
+#         labs(title = "Drive per class",
+#              x = "Class",
+#              y = "percentage")
 
 
-mp3 <- cat2(as.data.frame(mpg), "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "4", orderfun1 = mean,
+
+
+mp3 <- cat2(mpg, "class", "drv", orderfreq1 =TRUE, ordervar1 = "drv" , orderval1 = "4", orderfun1 = mean,
             orderfreq2 =TRUE, nlevel2 = c("4","r","f"))
 mp3
 mp3$plot +
-        geom_text(data = mp3$table$tbl1 , aes(x = class, y = -.05, label = numlabs)) +
-        geom_text(data = mp3$table$tbl1 , aes(x = class,
+        geom_text(data = mp3$table , aes(x = class, y = -.05, label = numlabs)) +
+        geom_text(data = mp3$table , aes(x = class,
                                               y = percval - 0.03,
                                               label = ifelse( index <= 4, perclabs, ""))) +
         theme(axis.text.x = element_text(angle=45, hjust=1))

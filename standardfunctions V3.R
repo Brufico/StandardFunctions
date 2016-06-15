@@ -1,8 +1,8 @@
 #'---
 #'title: "Standard Functions for Basic Statistical Analysis"
-#'subtitle: R code in standardfunctions V2.R
+#'subtitle: R code in standardfunctions V3.R
 #'author: "Bruno Fischer Colonimos"
-#'date: "11 june 2016"
+#'date: "15 juin 2016"
 #'abstract: |
 #'      This is the code, presented as a notebook.
 #'      It should help readability.
@@ -47,17 +47,20 @@ sfinitdefaults <- function () {
                 namesum ="",
                 language = "",
                 filldefault = "steelblue")
+        # Info function
+        info <- function() {names(defaultvalue)}
         # access function
         function(name=NULL, value = NULL){
                 if(is.null(name)) {
                         warning("initdefaults : You must supply a name",
                                 immediate. = TRUE, call. = TRUE)
                         NULL
-                } else {
-                        if (!is.null(value)) {
-                                defaultvalue[[name]] <<- value
-                                defaultvalue[[name]]
-                        } else {defaultvalue[[name]]}
+                } else {if (name=="?") {
+                        info()
+                } else if (!is.null(value)) {
+                        defaultvalue[[name]] <<- value
+                        defaultvalue[[name]]
+                } else {defaultvalue[[name]]}
                 }
         }
 }
@@ -67,22 +70,36 @@ sfinitdefaults <- function () {
 
 #+ sfdefaults, results = "hide"
 
+# begin
 sfdefault <- sfinitdefaults()
 
+# language
 sfdefault("language","french")
 if(sfdefault("language") == "french") {
         sfdefault("namesum", sfdefault("namesumfrench"))
 } else {
         sfdefault("namesum", sfdefault("namesumeng"))
 }
-sfdefault("reportNA", FALSE) # report number of NA's in a variable?
-sfdefault("digits", 2)
 
-#'
+#' programming options
+sfdefault("reportNA", FALSE) # report number of NA's in a variable?
+sfdefault("orderfreq", TRUE)
+
+#' display options
+sfdefault("digits", 2)
+sfdefault("sumdigits" , 2)
+sfdefault("filldefault", "steelblue")
+sfdefault("colorannots1", "red")
+sfdefault("discretebarwidth", 0.5)
+
+
+sfdefault("?")
+
+
+
+
 #' Return values structure
 #' ======================================
-
-
 
 
 # make a result list. unsupplied elements assigned default=NULL and not included in result list
@@ -90,14 +107,25 @@ make.result <- function(name = NULL,
                         numcases = NULL,
                         summaries = NULL,
                         levels = NULL,
+                        levels2 = NULL,
                         breaks = NULL,
                         closed= NULL,
-                        table = NULL,
-                        tabledf = NULL,
+                        table = NULL, # default table
+                        table1 = NULL,
+                        table2 = NULL,
+                        table3 = NULL,
                         ptable = NULL,
+                        details = NULL, # additional info (mostly in table form)
                         chi2 = NULL,
                         anova = NULL,
-                        plot = NULL ) {
+                        test1 = NULL,
+                        test2 = NULL,
+                        test3 = NULL,
+                        plot = NULL, # default plot
+                        plot1 = NULL,
+                        plot2 = NULL,
+                        plot3 = NULL
+                        ) {
         # get arg - values list
         lenv <- as.list(environment())
         # remove NULL values from list
@@ -110,7 +138,6 @@ make.result <- function(name = NULL,
 
 # result retrieval:
 # use result$name or result[[name]]
-
 
 
 
@@ -153,6 +180,11 @@ assoc.op <- function(opname, listargs) {
         }
 }
 
+
+# identify a  warning
+is.warning <- function(x) {"warning" %in% class(x)}
+
+
 #'
 #' Functions for filtering out NA's
 #' --------------------------------
@@ -160,7 +192,8 @@ assoc.op <- function(opname, listargs) {
 #'
 #'* from a dataframe/tbl
 #'
-#' ... is a succession of variable names which we want to filter out the NAs
+#' ...
+#' ~ is a succession of variable names which we want to filter out the NAs
 #' from ( ex: nonadf(dataframe, "age", "revenue"))
 #'
 nonadf <- function(dataf, ..., useNA = "no") {
@@ -323,10 +356,6 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
 #' Statistical Testing functions
 #' ---------------------------------------------------------------
 
-# identify a  warning
-is.warning <- function(x) {"warning" %in% class(x)}
-
-
 # try.chisq.test ==> essaye un test du chi2, et si il génère un warning
 # (conditions approximation du chi2 non satisfaites), alors, calculer la
 # p-valeur par simulation
@@ -390,9 +419,11 @@ try.chisq.test <- function(..., keep.all = TRUE) {
 
 # new definition OK
 cat1 <- function(dataf, nomfact, useNA = "no",
-                 orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
+                 orderfreq = sfdefault("orderfreq"),
+                 orderdesc = TRUE, ordervar = "c..nt",
                  orderval = NA, orderfun = sum,
-                 rfreq = TRUE, digits = 2, cfill = "steelblue") {
+                 rfreq = TRUE,
+                 digits = 2, cfill = sfdefault("filldefault")) {
         # useNA = "always, "ifany" or "no",
         # orderfreq = TRUE  or FALSE,
         # descorder =TRUE or FALSE
@@ -440,13 +471,7 @@ cat1 <- function(dataf, nomfact, useNA = "no",
         # ylabel
         if (rfreq) {pt <- pt + ylab(label = "percent")}
 
-        # return a list of values
-        # list(   name = nomfact,
-        #         levels = levels(dataf[[nomfact]]),
-        #         table = tbl, num = num,
-        #         uchisq = uchisq,
-        #         plot = pt
-        # )
+        # return
         make.result(name = nomfact,
                     numcases = num,
                     levels = levels(dataf[[nomfact]]),
@@ -462,8 +487,9 @@ cat1 <- function(dataf, nomfact, useNA = "no",
 
 
 # new definition:
-num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
-                  rfreq = TRUE, width = .5, cfill = "steelblue") {
+num1d <- function(dataf, nomvar, useNA ="no",
+                  digits = sfdefault("digits"), sumdigits = sfdefault("sumdigits"),
+                  rfreq = TRUE, width = sfdefault("discretebarwidth", 0.5), cfill = "steelblue") {
         # make a table (with Frequency = nb of rows)
         tb <- table(dataf[[nomvar]])
         num <- sum(tb)
@@ -474,7 +500,9 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
         colnames(tbl) <-  c(nomvar, "num", "rfreq", "perclabs")
         tbl$numlabs  <-  paste0("n=", tbl$num)
         tbl$index <- ave(1:nrow(tbl),  FUN = function(x) 1:length(x)) # rank
-        # print(tbl) #dbg
+        # printable table
+        ptb <- tbl[1:3]
+        colnames(ptb) <- c(nomvar, "Freq.", "Rel.Freq")
 
         s <- sumvector(dataf[[nomvar]])
 
@@ -497,14 +525,14 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
         # ylabel
         if (rfreq) {pt <- pt + ylab("percent")}
 
-
-        # return a list of values
-        list( name = nomvar,
-              summaries = s,
-              table = tbl,
-              num = num,
-              uchisq = uchisq,
-              plot = pt)
+        # return values
+        make.result(name = nomvar,
+                    summaries = s,
+                    table = tbl,
+                    ptable = ptb,
+                    numcases = num,
+                    chi2 = uchisq,
+                    plot = pt)
 }
 
 
@@ -516,7 +544,7 @@ num1d <- function(dataf, nomvar, useNA ="no", digits = 2, sumdigits = 2,
 # make class labels from bins vector
 mkclabs <- function(breaks, sep = " - ", closed = NULL) {
         if (is.null(closed)) {closed <- "right"} # default close="right"
-        closed
+        # closed
         if (closed == "right") {
                 bchar <- "]"
         } else if (closed == "left") {
@@ -538,17 +566,18 @@ mkclabs <- function(breaks, sep = " - ", closed = NULL) {
 
 # num1c
 num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
-                  fillhist = "steelblue", color_density = "red", digits = 2, # à modifier
+                  fillhist = sfdefault("filldefault"), color_density = "red", digits = 2, # à modifier
                   bins = NULL, closed = NULL, ...) {  # ... = addtl arguments for geom_hist
         if (plot_density) {usedensity <- TRUE} # plot_density overrides usedensity
         # bins = Null, integer, or a function name : "nclass.Sturges", "nclass.FD" , "nclass.scott"
+        # get or compute bins (as integer)
         if (!is.null(bins)) {
                 if ("character" %in% class(bins) ) {
                         bins <-  do.call(bins, list(nonavect(dataf[[nomvar]])))
                 } else {bins <- NULL
                 warning("bins is not a function", call. = TRUE)}
         }
-
+        # make histogram
         p <- ggplot(dataf, aes_(as.name(nomvar))) +
                 if (usedensity) {geom_histogram(aes(y=..density..),
                                                 bins = bins, fill = fillhist,...)
@@ -567,12 +596,10 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
         tb$numlabs <-  paste0("n=", tb$count)
         tb$perclabs <- paste0(100* round(tb$rfreq, digits), "%")
         tb$index <- ave(1:nrow(tb),  FUN = function(x) 1:length(x)) # rank
-        # get binwidth
-        cbinw <- unique(round(tb$xmax-tb$xmin,digits))
-        # get bins vector
-        cbins <- with(tb, c(xmin[1],xmax))
-        # make class lablels
-        clabs <- mkclabs(cbins, closed = closed)
+        # done, compute more info
+        cbinw <- unique(round(tb$xmax-tb$xmin,digits)) # get binwidth
+        cbreaks <- with(tb, c(xmin[1],xmax)) # get breaks vector from table
+        clabs <- mkclabs(cbreaks, closed = closed) # make class lablels
         # make a printable table
         ptb <- data.frame(
                 class = clabs,
@@ -583,26 +610,25 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
 
         # Uniform Chi2 test
         uchisq <- try.chisq.test(tb$count)
+        # warn if different class widths
         if (length(cbinw) >= 2) {
                 warning(paste0("Unif chi2 test ",
                                nomvar,
                                " called with different class widths!",
                                call. = TRUE)) }
 
-        # return named list
-        list(name = nomvar,
-             summaries = s,
-             tables = list(ggtable = tb,
-                           binwidths = cbinw,
-                           bins = cbins,
-                           ptable = ptb),
-             num = num,
-             uchisq = uchisq,
-             plot = p)
+        # return values
+        make.result( name = nomvar,
+                     numcases = num,
+                     summaries = s,
+                     table = tb,
+                     ptable = ptb,
+                     details =list(binwidths = cbinw,
+                                   breaks = cbreaks,
+                                   closed = closed),
+                     chi2 = uchisq,
+                     plot = p)
 }
-
-
-
 
 
 
@@ -613,11 +639,13 @@ num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
 
 # definition
 cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
-                 orderfreq1 = TRUE, orderdesc1 = TRUE, ordervar1 = "c..nt",
+                 orderfreq1 = sfdefault("orderfreq"), orderdesc1 = TRUE,
+                 ordervar1 = "c..nt",
                  orderval1 = NA, orderfun1 = sum, nlevel1 =NULL,
-                 orderfreq2 = TRUE, orderdesc2 = TRUE, ordervar2 = "c..nt",
+                 orderfreq2 = sfdefault("orderfreq"), orderdesc2 = TRUE,
+                 ordervar2 = "c..nt",
                  orderval2 = NA, orderfun2 = sum, nlevel2 =NULL,
-                 rfreq = TRUE, digits = 2, cfill = "steelblue"){
+                 rfreq = TRUE, digits = 2, cfill = sfdefault("filldefault") ) {
         # useNA = "always, "ifany" or "no", orderfreq = TRUE  or FALSE,
         # descorder =TRUE or FALSE
         # ordervar = variable to use for ordering
@@ -688,17 +716,21 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
                 guides(fill = guide_legend(reverse = TRUE)) +
                 ylab("percent")
 
-        #retourner les éléments
-        list(name = c(nomfact1, nomfact2),
-             levels = list(levels1 =levels(dataf[[nomfact1]]),
-                           levels2 =levels(dataf[[nomfact2]]) ),
-             tables =list(tbl=tbl, tblcrois=tblcrois, tbl1=tbl1, tbl2=tbl2),
-             num = num,
-             ichisq = ichisq,
-             plot = pt
-
+        make.result(
+                name = c(nomfact1, nomfact2),
+                num = num,
+                levels =levels(dataf[[nomfact1]]),
+                levels2 =levels(dataf[[nomfact2]]),
+                table = tbl1,
+                table1 = tblcrois,
+                details = list(tbl=tbl,tbl2=tbl2),
+                chi2 = ichisq,
+                plot = pt
         )
 }
+
+
+
 
 #' cat1num1
 #' -------------------------------------------------------------------------
@@ -773,18 +805,11 @@ cbyfhistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE, .
         }
         if (!is.factor(dataf[[varf]])) {dataf[[varf]] <- factor(dataf[[varf]])}
 
-        s <- condsummaries(dataf,vname = varc, fname = varf )
+        # s <- condsummaries(dataf,vname = varc, fname = varf )
 
         p <- if (usedensity) {ggplot(dataf,aes_(as.name(varc), y=quote(..density..), fill=as.name(varf)))
         } else {ggplot(dataf,aes_(as.name(varc), fill=as.name(varf)))}
         p <- p+ geom_histogram(..., position = "dodge")
-        # return named list
-        # list(name = c(varc , varf),
-        #      summaries = s,
-        #      table = NULL, #tb,
-        #      num = NA, #num
-        #      uchisq = NULL, # uchisq
-        #      plot = p)
         p
 }
 
@@ -815,13 +840,13 @@ cbyffachistogram <- function(dataf, varf, varc, useNA = "no", usedensity = FALSE
 
 #'### cat1num1c
 
-if (FALSE) {
+
 
 catnum1c <- function(dataf, nomfact, nomvar,  useNA = "no",
                      orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
                      orderval = NA, orderfun = sum, nlevel =NULL,
-                     breaks = NULL, closed= NULL,
-                     rfreq = TRUE, digits = 2, cfill = sfdefault("filldefault")){
+                     breaks = NULL, closed = NULL,
+                     rfreq = TRUE, digits = sfdefault("digits"), cfill = sfdefault("filldefault")){
         # Planned:
         # name = NULL,
         # numcases = NULL,
@@ -850,7 +875,6 @@ catnum1c <- function(dataf, nomfact, nomvar,  useNA = "no",
 
 }
 
-} # of comment
 
 
 

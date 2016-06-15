@@ -1,17 +1,17 @@
 --- 
 title: "Standard Functions for Basic Statistical Analysis"
-subtitle: "Readme file"
 author: "Bruno Fischer Colonimos"
-date: "4 juin 2016"
+date: "15 juin 2016"
 output:
   html_document:
     css: customex2.css
     number_sections: yes
     theme: readable
     toc: yes
-  pdf_document: 
+  pdf_document:
     toc: yes
   word_document: default
+subtitle: Readme file
 ---
 
 -------------------------------------------------------------
@@ -238,7 +238,7 @@ Functions Description: Helper functions
 General utility functions
 ----------------------------------
 
-### Function assoc.op : associative operator function.
+### Utility function assoc.op : associative operator function.
 
 #### Usage {-}
 
@@ -274,10 +274,36 @@ assoc.op("|", list(x,y,z) )
 ```
 
 
+### Utility function: is.warning() : Is this a warning ?
+
+#### Usage {-}
+```
+is.warning(x)
+```
+
+#### Arguments {-}
+x 
+~ the value to be tested
+
+#### Value {-}
+TRUE if x is a warning else FALSE
+
+#### Details {-}
+definition: 
+
+```
+is.warning <- function(x) {"warning" %in% class(x)}
+```
+
+#### Example {-}
+```
+None
+```
+
 Functions for filtering out NA's
 --------------------------------
 
-### Function nonadf(): filtering out NA's from a dataframe
+### Utility function: nonadf(): filter out NAs from specified dataframe columns
 
 #### Usage {-}
 ```
@@ -300,22 +326,31 @@ nonadf(dataf, ..., useNA = "no")
 nonadf(dtf, "cval1", "cval2", "nam1","dval2")
 ```
 
-### Function nonavect(): filtering out NA's from a vector
+### Utility function: nonavect() : remove NAs from a vector
 
 #### Usage {-}
 ```
-nonavect(vect)
+nonavect(x)
 ```
 
 #### Arguments {-}
+x ==> the vector
 
 #### Value {-}
+the vector with NA's removed
 
 #### Details {-}
 
-#### Example {-}
+definition: 
+
+```
+nonavect <- function(vect) {vect[which(!is.na(vect))]}
 ```
 
+#### Example {-}
+
+```
+None
 ```
 
 
@@ -519,68 +554,7 @@ missing example code
 ```
 
 
-Shortcut & utility functions
-----------------------------
 
-### Utility function: is.warning() : Is this a warning ?
-
-#### Usage {-}
-
-```
-is.warning(x)
-```
-
-#### Arguments {-}
-
-x ==> the value to be tested
-
-#### Value {-}
-
-TRUE if x is a warning else FALSE
-
-#### Details {-}
-
-definition: 
-
-```
-is.warning <- function(x) {"warning" %in% class(x)}
-```
-
-#### Example {-}
-
-```
-None
-```
-
-### utility function: nonavect() : removes NA's from a vector
-
-#### Usage {-}
-
-```
-nonavect(x)
-```
-
-#### Arguments {-}
-
-x ==> the vector
-
-#### Value {-}
-
-the vector with NA's removed
-
-#### Details {-}
-
-definition: 
-
-```
-nonavect <- function(vect) {vect[which(!is.na(vect))]}
-```
-
-#### Example {-}
-
-```
-None
-```
 
 Statistical functions
 ---------------------
