@@ -2,7 +2,7 @@
 #'title: "Standard Functions for Basic Statistical Analysis"
 #'subtitle: R code in standardfunctions V3.R
 #'author: "Bruno Fischer Colonimos"
-#'date: "15 juin 2016"
+#'date: "17 juin 2016"
 #'abstract: |
 #'      This is the code, presented as a notebook.
 #'      It should help readability.
@@ -42,7 +42,7 @@ sfinitdefaults <- function () {
                                "Min.", "1st Qu.","Median", "3rd Qu.",  "Max.",
                                " NA's"),
                 namesumfrench  = c("n", "Moyenne", "Ecart-type",
-                                   "Min.", "Q1","Médiane", "Q3",  "Max.",
+                                   "Min.", "Q1","M?diane", "Q3",  "Max.",
                                    " NA's"),
                 namesum ="",
                 language = "",
@@ -303,7 +303,7 @@ condfreqtable <- function(dataf, nomfact1, nomfact2, useNA = "no") {
         dt <-prop.table(table(dataf[[nomfact1]], dataf[[nomfact2]] , useNA = useNA),
                         margin = 1)
         dt2 <- as.data.frame(dt)
-        names(dt2) <- c(nomfact1, nomfact2, "perc") #compatibilité avec la def ancienne
+        names(dt2) <- c(nomfact1, nomfact2, "perc") #compatibilit? avec la def ancienne
         dt2
 }
 
@@ -339,7 +339,7 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
                                               1, 0))
                         ordervar <- "c..nt"
                 }
-                # réordonner le facteur
+                # r?ordonner le facteur
                 xx <- dataf[[nomfact]]
                 xxx <- direction * dataf[[ordervar]]
                 resfact <- reorder(xx, xxx, orderfun, na.rm = TRUE)
@@ -356,12 +356,12 @@ orderfact <- function(dataf, nomfact, orderfreq = TRUE, orderdesc = TRUE,
 #' Statistical Testing functions
 #' ---------------------------------------------------------------
 
-# try.chisq.test ==> essaye un test du chi2, et si il génère un warning
+# try.chisq.test ==> essaye un test du chi2, et si il g?n?re un warning
 # (conditions approximation du chi2 non satisfaites), alors, calculer la
 # p-valeur par simulation
 # si keep-all, retourne les 2 tests (chi2 et
-# simulation, une valeur logique indiquant le warning, et le warning lui-même).
-# Le test préférée est alors listé comme test1
+# simulation, une valeur logique indiquant le warning, et le warning lui-m?me).
+# Le test pr?f?r?e est alors list? comme test1
 
 try.chisq.test <- function(..., keep.all = TRUE) {
         ww <- tryCatch(chisq.test(...),
@@ -397,7 +397,7 @@ try.chisq.test <- function(..., keep.all = TRUE) {
 #' Main analysis functions
 #' ================================================================
 
-#' **Résultat désiré:**
+#' **R?sultat d?sir?:**
 #'
 #' *  **une variable**
 #'     * cat1  1 facteur
@@ -566,7 +566,7 @@ mkclabs <- function(breaks, sep = " - ", closed = NULL) {
 
 # num1c
 num1c <- function(dataf, nomvar, usedensity = FALSE, plot_density = FALSE,
-                  fillhist = sfdefault("filldefault"), color_density = "red", digits = 2, # à modifier
+                  fillhist = sfdefault("filldefault"), color_density = "red", digits = 2, # ? modifier
                   bins = NULL, closed = NULL, ...) {  # ... = addtl arguments for geom_hist
         if (plot_density) {usedensity <- TRUE} # plot_density overrides usedensity
         # bins = Null, integer, or a function name : "nclass.Sturges", "nclass.FD" , "nclass.scott"
@@ -656,7 +656,7 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
                                         ordervar2, orderval2, orderfun2, nlevel2)
         # nomfact1
         if(orderfreq1 == TRUE &
-           ordervar1 == nomfact2 & !is.na(orderval1)){ # fréquences conditionnelles!
+           ordervar1 == nomfact2 & !is.na(orderval1)){ # fr?quences conditionnelles!
                 #print("Frequ cond")
                 tbl <- condfreqtable(dataf, nomfact1, nomfact2,  useNA = "no")
                 #print("apres Frequ cond table")
@@ -735,14 +735,56 @@ cat2 <- function(dataf, nomfact1, nomfact2,  useNA = "no",
 #' cat1num1
 #' -------------------------------------------------------------------------
 #
-# fonctions de détermination du nombre de classes dabs un histogramme
+# fonctions de d?termination du nombre de classes dabs un histogramme
 # nclass.Sturges(mpg$hwy)
 # nclass.FD(mpg$hwy)
 # nclass.scott(mpg$hwy)
 #
 #
-#' ### fonctions de generation de graphiques
-#'
+#' ### fonctions de generation de graphiques ===================================================
+
+#' ?? useful??
+get.bins <- function(dataf,nomvar,bins) {
+        if (!is.null(bins)) {
+                if ("character" %in% class(bins) ) {
+                        bins <-  do.call(bins, list(nonavect(dataf[[nomvar]])))
+                } else {bins <- NULL
+                warning("bins is not a function", call. = TRUE)}
+        }
+        bins
+}
+
+# simple Histogram + optional density
+chistodens <- function(dataf, nomvar,
+                       usedensity = FALSE, usendensity =FALSE, plot_density = FALSE,
+                       fillhist = sfdefault("filldefault"), color_density = "red", digits = 2, # ? modifier
+                       bins = NULL, closed = NULL, ...) {  # ... = addtl arguments for geom_hist
+        if (plot_density) {
+                usedensity <- TRUE
+        } # plot_density overrides usedensity, density overrides ndensity
+        if (usedensity){
+                usendensity <- FALSE
+        }
+        # bins = Null, integer, or a function name : "nclass.Sturges", "nclass.FD" , "nclass.scott"
+        # get or compute bins (as integer)
+        if (!is.null(bins)) {
+                if ("character" %in% class(bins) ) {
+                        bins <-  do.call(bins, list(nonavect(dataf[[nomvar]])))
+                } else {bins <- NULL
+                warning("bins is not a function", call. = TRUE)}
+        }
+        # make histogram
+        p <- ggplot(dataf, aes_(as.name(nomvar))) +
+                if (usedensity) {geom_histogram(aes(y=..density..),
+                                                bins = bins, fill = fillhist,...)
+                } else if (usendensity) {geom_histogram(aes(y=..ndensity..),
+                                                       bins = bins, fill = fillhist,...)
+                } else {geom_histogram(bins = bins, fill = fillhist, ...)}
+
+        if (plot_density) {p <- p + geom_density(color=color_density) }
+        p
+}
+
 
 # continuous x factor boxplot & jitter plot
 cbyfboxjit <- function(dataf, varf, varc, useNA = "no",
@@ -849,12 +891,30 @@ cbyffachistogram <- function(dataf, varf, varc, useNA = "no",
 #'### cat1num1c
 
 
-
+# in progress
 catnum1c <- function(dataf, nomfact, nomvar,  useNA = "no",
                      orderfreq = TRUE, orderdesc = TRUE, ordervar = "c..nt",
                      orderval = NA, orderfun = sum, nlevel =NULL,
+                     labellayer = "", labelall = "All values", labelgroups = "by goup",
                      breaks = NULL, closed = NULL,
                      rfreq = TRUE, digits = sfdefault("digits"), cfill = sfdefault("filldefault")){
+        #ordering the factor if needed
+        dataf[[nomfact]] <-  orderfact(dataf, nomfact, orderfreq, orderdesc,
+                                        ordervar, orderval, orderfun, nlevel)
+        # make a plot (box-jitter)
+        pt1 <- cbyfboxjit(dataf, varf=nomfact, varc=nomvar, useNA = useNA,
+                         labellayer = labellayer, labelall = labelall, labelgroups = labelgroups)
+        # faceted histogram
+        pt2 <- cbyffachistogram(dataf, varf=nomfact, varc=nomvar, useNA = useNA,
+                                usedensity = FALSE, usendensity = FALSE,
+                                breaks = breaks, closed = closed,...)
+        # summaries
+        c <- condsummaries(dataf = dataf,vname = nomvar,fname = nomfact)
+
+        # tables
+        # make factor with cut
+        # tb1 =
+
         # Planned:
         # name = NULL,
         # numcases = NULL,
@@ -876,7 +936,6 @@ catnum1c <- function(dataf, nomfact, nomvar,  useNA = "no",
         s <- condsummaries(dataf, nomvar, nomfact)
         # levels
         levels = levels(dataf[[nomfact]]) # see if reorder
-        # breaks
         # breaks = breaks # include in output, nothing to compute ??? depends
         # table
         # table <-

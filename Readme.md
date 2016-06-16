@@ -1,7 +1,7 @@
 --- 
 title: "Standard Functions for Basic Statistical Analysis"
 author: "Bruno Fischer Colonimos"
-date: "15 juin 2016"
+date: "17 juin 2016"
 output:
   html_document:
     css: customex2.css
@@ -386,7 +386,7 @@ are defined initially:
 namesumeng = c("n", "Mean", "St.dev", 
                 "Min.", "1st Qu.","Median", "3rd Qu.", "Max.", " NA's") 
 namesumfrench  = c("n", "Moyenne", "Ecart-type", 
-                "Min.", "Q1","Médiane", "Q3",  "Max.", " NA's"),
+                "Min.", "Q1","M?diane", "Q3",  "Max.", " NA's"),
 ```
 
 
@@ -395,7 +395,7 @@ namesumfrench  = c("n", "Moyenne", "Ecart-type",
 ``` 
 sumvector(mpg[["hwy"]])
 
-##          n    Moyenne Ecart-type        Min.        Q1    Médiane        Q3      Max. 
+##          n    Moyenne Ecart-type        Min.        Q1    M?diane        Q3      Max. 
 ## 234.000000  23.440000   5.954643  12.000000  18.000000  24.000000 27.000000  44.000000
 
 ```
@@ -431,7 +431,7 @@ Moyenne     23.440000  16.860000
 Ecart-type   5.954643   4.255946
 Min.        12.000000   9.000000
 Q1          18.000000  14.000000
-Médiane     24.000000  17.000000
+M?diane     24.000000  17.000000
 Q3          27.000000  19.000000
 Max.        44.000000  35.000000
 
@@ -469,7 +469,7 @@ condsummaries(mpg,"hwy","class")
 ## Ecart-type  1.30384  3.78162  2.13593  2.062655  2.27428   5.375012  2.977973
 ## Min.       23.00000 23.00000 23.00000 17.000000 12.00000  20.000000 12.000000
 ## Q1         24.00000 26.00000 26.00000 22.000000 16.00000  24.500000 17.000000
-## Médiane    25.00000 27.00000 27.00000 23.000000 17.00000  26.000000 17.500000
+## M?diane    25.00000 27.00000 27.00000 23.000000 17.00000  26.000000 17.500000
 ## Q3         26.00000 29.00000 29.00000 24.000000 18.00000  30.500000 19.000000
 ## Max.       26.00000 44.00000 32.00000 24.000000 22.00000  44.000000 27.000000
 
