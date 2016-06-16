@@ -417,6 +417,8 @@ levels(factor(mpg$drv))
 
 # =============================================================================
 
-p <- cbyffachistogram(mpg, "drv", "cty", bins=)
+p <- cbyffachistogram(mpg, "drv", "cty", bins=10)
+p
 
-
+pp <- chistodens(mpg,"cty", bins="nclass.FD")
+pp
